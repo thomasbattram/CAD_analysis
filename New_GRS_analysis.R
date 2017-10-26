@@ -24,7 +24,6 @@ non_sig_score_lr_nr <- linearRegress('non_sig_score', nr_mnames, d)
 ##########
 # Forest #
 ##########
-#source("R/forest_plot_function_Tom's.R")
 source("R/Forest_plot_functions.R")
 non_sig_score_lr_nr <- arrange(non_sig_score_lr_nr, Metabolite)
 sig_score_lr_nr <- arrange(sig_score_lr_nr, Metabolite)
