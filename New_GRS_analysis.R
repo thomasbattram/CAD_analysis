@@ -41,13 +41,6 @@ pdf("outputs/forests/all_scores_nrmetabs_forest.pdf", width = 15, height = 10)
 forest_plot(forest_dat, col_num = 4, group = "score", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)")
 dev.off()
 
-#Comparing CAD_score, sig_score and non_sig_score
-result <- list(CAD_score_lr_nr, sig_score_lr_nr, non_sig_score_lr_nr)
-names(result) <- c("CAD_score", "sig_score", "non_sig_score")
-pdf("outputs/forests/all_scores_nrmetabs_forest.pdf", width = 15, height = 10)
-forestPlot(result, sigP = p_score_nr/3, columns = 4)
-dev.off()
-
 ######
 # QQ #
 ######
