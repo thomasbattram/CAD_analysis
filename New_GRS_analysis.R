@@ -24,7 +24,22 @@ non_sig_score_lr_nr <- linearRegress('non_sig_score', nr_mnames, d)
 ##########
 # Forest #
 ##########
-source("R/forest_plot_function_Tom's.R")
+#source("R/forest_plot_function_Tom's.R")
+source("R/Forest_plot_functions.R")
+non_sig_score_lr_nr <- arrange(non_sig_score_lr_nr, Metabolite)
+sig_score_lr_nr <- arrange(sig_score_lr_nr, Metabolite)
+CAD_score_lr_nr <- arrange(CAD_score_lr_nr, Metabolite)
+stopifnot(nrow(CAD_score_lr_nr) == nrow(sig_score_lr_nr) && nrow(CAD_score_lr_nr) == nrow(sig_score_lr_nr))
+
+facet_var <- facet_var_gen(CAD_score_lr_nr, col_num = 4, group_num = 3)
+forest_dat <- rbind(CAD_score_lr_nr[, 1:7], sig_score_lr_nr, non_sig_score_lr_nr) %>%
+  mutate(score = rep(c("CAD", "sig", "non_sig"), each = nrow(CAD_score_lr_nr))) %>%
+  mutate(facet_var = facet_var)
+
+forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
+pdf("outputs/forests/all_scores_nrmetabs_forest.pdf", width = 15, height = 10)
+forest_plot(forest_dat, col_num = 4, group = "score", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)")
+dev.off()
 
 #Comparing CAD_score, sig_score and non_sig_score
 result <- list(CAD_score_lr_nr, sig_score_lr_nr, non_sig_score_lr_nr)
