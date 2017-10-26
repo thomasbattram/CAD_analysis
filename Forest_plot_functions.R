@@ -16,28 +16,12 @@ facet_var_gen <- function (dat, col_num, group_num = 1) {
 }
 
 
-non_sig_score_lr_nr <- arrange(non_sig_score_lr_nr, Metabolite)
-sig_score_lr_nr <- arrange(sig_score_lr_nr, Metabolite)
-CAD_score_lr_nr <- arrange(CAD_score_lr_nr, Metabolite)
-stopifnot(nrow(CAD_score_lr_nr) == nrow(sig_score_lr_nr) && nrow(CAD_score_lr_nr) == nrow(sig_score_lr_nr))
-
-
-
-col_num <- 4
-score_num <- 3
-facet_var <- facet_var_gen(CAD_score_lr_nr, col_num = 4, group_num = 3)
-nrow(CAD_score_lr_nr)*3
-
-forest_test_dat <- rbind(CAD_score_lr_nr[, 1:7], sig_score_lr_nr, non_sig_score_lr_nr) %>%
-	mutate(score = rep(c("CAD", "sig", "non_sig"), each = nrow(CAD_score_lr_nr))) %>%
-	mutate(facet_var = facet_var)
-
-forest_test_dat[["facet_var"]] <- as.factor(forest_test_dat[["facet_var"]])
-
-
 forest_plot <- function(dat, col_num, group = NA, y_axis_var, units = NULL, title = NULL) {
 #Format of data for plot (doesn't matter where in the data frame these things are and can have extra columns)
 # y_axis_var Estimate 2.5 % 97.5 % 
+# ----------  ----     --    ---
+# ----------  ----     --    --- 
+# ----------  ----     --    ---
 
 group_num <- length(unique(dat[[group]]))
 if (group_num == 0) {
@@ -95,14 +79,3 @@ if (group_num == 0) {
 
 	grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], right = legend, bottom = units, top = title, ncol = 4, nrow = 1, newpage = FALSE)
 }
-#put the plot into a pdf
-pdf("testing_forest_2.pdf", width = 15, height = 10)
-forest_plot(dat = forest_test_dat, col_num = 4, group = "score", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)")
-dev.off()
-
-
-
-
-
-
-
