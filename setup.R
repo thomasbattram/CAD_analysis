@@ -148,6 +148,12 @@ d <- arrange(d, cidB9999, qlet)
 
 length(mnames) - length(nr_mnames) #81
 
+#For age specific analyses
+if (age != "all") {
+  d <- filter(d, age == age)
+  print(paste("The following analyses will be conducted at age", age, "only"))
+}
+
 print("setup complete - please proceed to the CAD-GRS analysis")
 
 

@@ -37,7 +37,7 @@ k <- cutree(PRhoTree, h = 0.2) ## distances are in 1 - Pearson Rho distances CHA
 table(k) ## 43 Clusters
 
 ## Plot dendrogram
-pdf("outputs/Clustering_DendRect.pdf", width = 20, height = 12)
+pdf(paste0("outputs/other/", as.character(age), "/Clustering_DendRect.pdf"), width = 20, height = 12)
 par(mfrow = c(1,1))
 plot(PRhoTree, hang = -1, cex = 0.5, main = "1 - Pearson Rho Cluster Dendrogram", col = "royalblue", lwd = 2)
 rect.hclust( PRhoTree , h = 0.20, border = "red")
@@ -98,7 +98,6 @@ names(test) <- str_replace(names(test), "[0-9]", "")
 
 CC2 <- sample( colorRampPalette(brewer.pal(9,"Set1"))(length(subsets) + length(new_sets) ))
 names(CC2) <- c(names(subsets), names(new_sets))
-###DOESN'T WORK - CHANGE IT HERE!!!!!
 
 temp_dat <- CAD_score_lr_nr %>%
 	mutate(new_subset = ifelse(is.na(subset), case_when(

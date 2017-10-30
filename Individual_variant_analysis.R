@@ -55,8 +55,8 @@ sig_nr_FDR <- extract_sig_hits(indi_SNP_results_nr, type = "fdr")
 names_sig_nr <- names(sig_nr)
 names_sig_nr_FDR <- names(sig_nr_FDR)
 
-write.table(names_sig_nr, "outputs/significant_SNPs.txt", quote = F, col.names = F, row.names = F, sep = "\t")
-write.table(names_sig_nr_FDR, "outputs/FDR_significant_SNPs.txt", quote = F, col.names = F, row.names = F, sep = "\t")
+write.table(names_sig_nr, paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
+write.table(names_sig_nr_FDR, paste0("outputs/other/", as.character(age), "/FDR_significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
 
 workbook <- createWorkbook()
 for (i in names_sig_nr_FDR) {
@@ -66,7 +66,7 @@ for (i in names_sig_nr_FDR) {
   addWorksheet(wb = workbook, sheetName = i, gridLines = TRUE)
   writeDataTable(wb = workbook, sheet = i, x = temp_dat)
 }
-saveWorkbook(workbook, file = "outputs/tables/FDR_significant_SNP-metab_associations.xlsx", overwrite = TRUE)
+saveWorkbook(workbook, file = paste0("outputs/tables/", as.character(age), "/FDR_significant_SNP-metab_associations.xlsx"), overwrite = TRUE)
 
 #######################################
 #### HEATMAPS - beta-coefs #######
@@ -110,7 +110,7 @@ hmcol <- colorRampPalette(brewer.pal(9, "RdBu"))
 
 
 #all SNPs vs no ratios metabs 
-pdf("outputs/heatmaps/all_SNPs_vs_nr_metabs_coef.pdf", width = 15, height = 10)
+pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_coef.pdf"), width = 15, height = 10)
 heatmap.2( t(db), breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "both" , Colv =  Pden, Rowv = TRUE, ColSideColors = ColCol)
 dev.off()
 
@@ -159,7 +159,7 @@ hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
 
 ## p value PLOT
 #all SNPs vs no ratios metabs
-pdf("outputs/heatmaps/all_SNPs_vs_nr_metabs_pval.pdf", width = 15, height = 10)
+pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_pval.pdf"), width = 15, height = 10)
 heatmap.2( t(db), key = FALSE, breaks = b,  trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "none" , Colv =  Pden, Rowv = TRUE, ColSideColors = ColCol)
 dev.off()
 
@@ -203,7 +203,7 @@ b <- seq(from = -5, to = 5, by = 1)
 hmcol <- colorRampPalette(brewer.pal(9, "RdBu"))
 
 #
-pdf("outputs/heatmaps/all_SNPs_vs_nr_metabs_coef_TEST.pdf", width = 15, height = 10)
+pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_coef_TEST.pdf"), width = 15, height = 10)
 heatmap.2( t(db), breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "row", Colv = FALSE, Rowv = TRUE, ColSideColors = ColCol2)
 dev.off()
 #
@@ -254,7 +254,7 @@ sig <- brewer.pal(11, "Spectral")[1:5]
 hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
 
 #
-pdf("outputs/heatmaps/all_SNPs_vs_nr_metabs_pval_TEST.pdf", width = 15, height = 10)
+pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_pval_TEST.pdf"), width = 15, height = 10)
 heatmap.2( t(db), key = FALSE, breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "none", Colv = FALSE, Rowv = TRUE, ColSideColors = ColCol2, lwid = c(0.1, 4), lhei = c(0.1, 4, 1))
 dev.off()
 #

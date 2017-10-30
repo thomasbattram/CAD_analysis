@@ -3,7 +3,7 @@
 ####################
 
 #Read in variants 
-sig_SNPs <- read.delim("outputs/significant_SNPs.txt", stringsAsFactors = F, header = F)
+sig_SNPs <- read.delim(paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), stringsAsFactors = F, header = F)
 #sig_SNPs <- read.delim("outputs/FDR_significant_SNPs.txt")
 sig_SNPs <- paste(sig_SNPs[[1]], "_w", sep = "")
 non_sig_SNPs <- SNPs[!(SNPs %in% sig_SNPs)]
@@ -36,8 +36,8 @@ forest_dat <- rbind(CAD_score_lr_nr[, 1:7], sig_score_lr_nr, non_sig_score_lr_nr
   mutate(facet_var = facet_var)
 
 forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
-pdf("outputs/forests/all_scores_nrmetabs_forest.pdf", width = 15, height = 10)
-forest_plot(forest_dat, col_num = 4, group = "score", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)")
+pdf(paste0("outputs/forests/", as.character(age), "/all_scores_nrmetabs_forest.pdf"), width = 15, height = 10)
+print(forest_plot(forest_dat, col_num = 4, group = "score", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)"))
 dev.off()
 
 ######
@@ -64,7 +64,7 @@ p <- ggplot(res_out, aes(x = x, y = y.CAD)) +
   #ggtitle(nom) +
   theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20)) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)), colour = "Genetic risk score")
-pdf("outputs/3_scores_vs_metabs_qq.pdf", width = 20, height = 10)
+pdf(paste0("outputs/other/", as.character(age), "/3_scores_vs_metabs_qq.pdf"), width = 20, height = 10)
 print(p)
 dev.off()
 
@@ -91,7 +91,7 @@ p <- ggplot(res_out, aes(x = x, y = y.CAD)) +
   #ggtitle(nom) +
   theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), axis.line = element_line(colour = "black")) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)), colour = "Genetic risk score")
-pdf("outputs/2_scores_vs_metabs_qq.pdf", width = 20, height = 10)
+pdf(paste0("outputs/other/", as.character(age), "/2_scores_vs_metabs_qq.pdf"), width = 20, height = 10)
 print(p)
 dev.off()
 

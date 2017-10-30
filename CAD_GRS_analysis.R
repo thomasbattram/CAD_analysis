@@ -39,7 +39,7 @@ p <- ggplot(res_out, aes(x = x, y = y)) +
   #ggtitle(nom) +
   theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30)) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)))
-pdf("outputs/CAD_score_qq.pdf", width = 15, height = 10)
+pdf(paste0("outputs/other/", as.character(age), "/CAD_score_qq.pdf"), width = 15, height = 10)
 print(p)
 dev.off()
 
@@ -117,7 +117,7 @@ nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = "
     #labels = c("l-HDL", "l-VLDL", "LDL", "Rem P", "s-HDL", "vl-HDL"),
     #values = colours))
 
-pdf("outputs/CAD_score_vs_lipoprotein_subclasses_QQ.pdf", width = 15, height = 10)
+pdf(paste0("outputs/other/", as.character(age), "/CAD_score_vs_lipoprotein_subclasses_QQ.pdf"), width = 15, height = 10)
 print(p)
 dev.off()
 
@@ -125,12 +125,13 @@ dev.off()
 # Differences between subsets ###
 #################################
 #Boxplot looking at effect size differences between groups
-pdf("outputs/lipoprotein_subclass_effect_comparison.pdf", width = 15, height = 10)
-ggplot(res_out) +
+pdf(paste0("outputs/other/", as.character(age), "/lipoprotein_subclass_effect_comparison.pdf"), width = 15, height = 10)
+p <- ggplot(res_out) +
   geom_boxplot(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset)) +
   labs(x = "Particle size class", y = "Relative effect estimate") +
   theme(text = element_text(size = 30), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL"))
+print(p)
 dev.off()
 #Testing for normality within group estimates
 shap_test <- vector(mode = "list", length = length(unique(res_out$subset)))
@@ -145,7 +146,7 @@ shap_test
 kw_test <- kruskal.test(Estimate ~ subset, data = res_out) 
 dunn_test <- dunnTest(Estimate ~ subset, data = res_out, method = "bh")
 dunn_res <- dunn_test[[2]]
-write.table(dunn_res, "outputs/tables/lipoprotein_subclass_kw_test.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(dunn_res, paste0("outputs/tables/", as.character(age), "/lipoprotein_subclass_kw_test.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 ################
 # Associations #
 ################
@@ -159,7 +160,7 @@ length(lipoproteins)
 sum(lipoproteins %in% CAD_assoc$Metabolite)
 
 CAD_score_lr_nr <- arrange(CAD_score_lr_nr, `Pr(>|t|)`)
-write.table(CAD_score_lr_nr, file = "outputs/tables/CAD_GRS_metabolite_full_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(CAD_score_lr_nr, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
 #################
 # subsets table #
@@ -168,7 +169,7 @@ sub_tab <- res_out %>%
   arrange(subset) %>%
   select(Metabolite, subset, group)
 
-write.table(sub_tab, file = "outputs/tables/subset_table.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(sub_tab, file = paste0("outputs/tables/", as.character(age), "/subset_table.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
 median(abs(CAD_score_lr_nr$Estimate))
 print("CAD-GRS analysis complete - please proceed to the Individual variant analysis")

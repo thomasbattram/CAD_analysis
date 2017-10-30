@@ -45,8 +45,8 @@ sig_nr_FDR <- extract_sig_hits(HMGCR_SNP_results_nr, type = "fdr")
 # Make tables of results #
 ##########################
 
-write.table(sig_nr_FDR[[1]], file = "outputs/rs17238484_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
-write.table(sig_nr_FDR[[2]], file = "outputs/rs12916_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(sig_nr_FDR[[1]], file = paste0("outputs/other/", as.character(age), "/rs17238484_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(sig_nr_FDR[[2]], file = paste0("outputs/other/", as.character(age), "/rs12916_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
 
 
