@@ -77,5 +77,10 @@ if (group_num == 0) {
 	)
 
 
-	grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], right = legend, bottom = units, top = title, ncol = 4, nrow = 1, newpage = FALSE)
+	marrangeGrob(plots, right = legend, bottom = units, top = title, ncol = col_num, nrow = 1, newpage = FALSE)
 }
+
+
+
+
+
