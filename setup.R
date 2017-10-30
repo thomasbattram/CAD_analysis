@@ -17,6 +17,7 @@
 #install.packages("qqman")
 #install.packages("zeallot")
 #install.packages("data.table")
+#install.packages("gridExtra")
 
 library(cluster)
 library(RColorBrewer)
@@ -34,7 +35,7 @@ library(qqman)
 library(stringr)
 library(zeallot)
 library(data.table)
-
+library(gridExtra)
 
 ##################################################
 ### Read in all the data from Stata 	##########  #####NEED TO CHANGE THIS SECTION SO THAT YOU READ IN THE FILE PEOPLE WILL RECEIVE FROM ALSPAC AND CHANGE IT SO THAT IT IS MERGED - ALSO NEED TO CHANGE/ADD IN HOW TO SORT THE GENOTYPE FILE
