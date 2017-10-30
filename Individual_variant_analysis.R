@@ -223,18 +223,25 @@ stopifnot(sum(temp_dat$Metabolite %in% rownames(db)) == 151)
 
 #
 db <- as.data.frame(db) %>%
-  mutate(Metabolite = rownames(.)) %>%
-  left_join(temp_dat) %>%
-  arrange(new_subset)
+  select(sort(colnames(db)))
 
+#Sanity check
+stopifnot(colnames(db) == unlist(str_split(SNP_loci, "_"))[seq(1, 110, by = 2)])
 
-db <- select(db, sort(colnames(db)))
+#Add in gene names
 colnames(db) <- SNP_loci
 
+
+db <- mutate(db, Metabolite = rownames(db)) %>%
+  left_join(temp_dat) %>%
+  arrange(new_subset)
+colnames(db)
+
+
 rownames(db) <- db[["Metabolite"]]
-
+colnames(db)
 db <- select(db, -one_of(colnames(temp_dat)))
-
+colnames(db)
 db <- as.matrix(db)
 #
 
@@ -248,7 +255,7 @@ hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
 
 #
 pdf("outputs/heatmaps/all_SNPs_vs_nr_metabs_pval_TEST.pdf", width = 15, height = 10)
-heatmap.2( t(db), key = FALSE, breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "none", Colv = FALSE, Rowv = TRUE, ColSideColors = ColCol2)
+heatmap.2( t(db), key = FALSE, breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "none", Colv = FALSE, Rowv = TRUE, ColSideColors = ColCol2, lwid = c(0.1, 4), lhei = c(0.1, 4, 1))
 dev.off()
 #
 
