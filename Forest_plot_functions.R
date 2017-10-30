@@ -8,7 +8,7 @@ facet_var_gen <- function (dat, col_num, group_num = 1) {
 	if (nrow(dat) %% 2 != 0) {
 		facet_var <- rep(
 			c(rep(1:(col_num-1), each = ceiling(nrow(dat) / col_num)),
-			rep(col_num, each = floor((nrow(dat) - 1) / col_num))),
+			rep(col_num, times = nrow(dat) - (ceiling(nrow(dat) / col_num) * (col_num - 1)))),
 			times = group_num)
 	} else {
 		facet_var <- rep(rep(1:col_num, each = ceiling(nrow(dat) / col_num)), times = group_num)
