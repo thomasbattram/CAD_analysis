@@ -43,12 +43,32 @@ for (i in unique(met_dat[["age"]])) {
 	age_diff[[as.character(i)]] <- temp_out
 }
 
+particle_mets <- nr_mnames[grep("-P$", nr_mnames)]
 result <- age_diff
+for (i in names(result)) {
+	result[[i]] <- result[[i]] %>%
+		filter(!(Metabolite %in% particle_mets))
+}
 ###PRODUCES A FOREST THAT ALLOWS VISUALISATION OF DATA - the metabolite conc differences are too large
 # Still not completely right
-pdf("outputs/TEST_AGE_FOREST.pdf", width = 15, height = 10)
+pdf("outputs/Age_diff_met_conc_no_particle_forest.pdf", width = 15, height = 10)
 forestPlot(result, columns = 4)
 dev.off()
+
+#--------- Particle sizes only
+
+result <- age_diff
+for (i in names(result)) {
+	result[[i]] <- result[[i]] %>%
+		filter(Metabolite %in% particle_mets)
+}
+###PRODUCES A FOREST THAT ALLOWS VISUALISATION OF DATA - the metabolite conc differences are too large
+# Still not completely right
+pdf("outputs/Age_diff_met_conc_particle_only_forest.pdf", width = 15, height = 10)
+forestPlot(result, columns = 1)
+dev.off()
+
+#--------------------------------
 
 full_dat <- do.call(rbind, age_diff)
 full_dat$age <- c(rep(7, 149), rep(15, 149), rep(17, 149))
@@ -64,7 +84,7 @@ for (i in unique(d[["age"]])) {
 	age_diff_reg[[as.character(i)]] <- linearRegress('CAD_score', nr_mnames[-c(150, 151)], temp_dat)
 }
 result <- age_diff_reg
-pdf("outputs/TEST_AGE_FOREST_2.pdf", width = 15, height = 10)
+pdf("outputs/Age_diff_GRS_met_forest.pdf", width = 15, height = 10)
 forestPlot(result, columns = 4)
 dev.off()
 
