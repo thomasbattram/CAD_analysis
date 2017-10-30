@@ -14,12 +14,7 @@ facet_var_gen <- function (dat, col_num, group_num = 1) {
 		facet_var <- rep(rep(1:col_num, each = ceiling(nrow(dat) / col_num)), times = group_num)
 	}
 }
-dat <- forest_dat 
-col_num = 4 
-group = "age" 
-y_axis_var = "Metabolite"
-units = "Beta coefficient (95% CI)"
-title = NULL
+
 
 forest_plot <- function(dat, col_num, group = NA, y_axis_var, units = NULL, title = NULL) {
 #Format of data for plot (doesn't matter where in the data frame these things are and can have extra columns)
