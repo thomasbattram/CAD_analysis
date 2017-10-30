@@ -49,10 +49,27 @@ for (i in names(result)) {
 	result[[i]] <- result[[i]] %>%
 		filter(!(Metabolite %in% particle_mets))
 }
+
+stopifnot(result[[1]][["Metabolite"]] == result[[2]][["Metabolite"]] && result[[1]][["Metabolite"]] == result[[3]][["Metabolite"]])
+
+source("R/Forest_plot_functions.R")
+
+facet_var <- facet_var_gen(result[[1]], col_num = 4, group_num = 3)
+
+forest_dat_2 <- do.call(rbind, result) 
+forest_dat_2 <- mutate(forest_dat_2, age = rep(c("7", "15", "17"), each = nrow(result[[1]]))) %>%
+	mutate(facet_var = facet_var)
+	
+
+forest_dat <- do.call(rbind, result) %>%
+	mutate(age = rep(c("7", "15", "17"), each = nrow(result[[1]]))) %>%
+	mutate(facet_var = facet_var)
+
 ###PRODUCES A FOREST THAT ALLOWS VISUALISATION OF DATA - the metabolite conc differences are too large
 # Still not completely right
-pdf("outputs/Age_diff_met_conc_no_particle_forest.pdf", width = 15, height = 10)
-forestPlot(result, columns = 4)
+forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
+pdf("outputs/forests/Age_diff_met_conc_no_particle_forest.pdf", width = 15, height = 10)
+forest_plot(forest_dat, col_num = 4, group = "age", y_axis_var = "Metabolite", units = "Log10(median metabolite concentration)")
 dev.off()
 
 #--------- Particle sizes only
@@ -62,10 +79,23 @@ for (i in names(result)) {
 	result[[i]] <- result[[i]] %>%
 		filter(Metabolite %in% particle_mets)
 }
+stopifnot(result[[1]][["Metabolite"]] == result[[2]][["Metabolite"]] && result[[1]][["Metabolite"]] == result[[3]][["Metabolite"]])
+
+#Need to change facet_var_gen()
+facet_var <- facet_var_gen(result[[1]], col_num = 2, group_num = 3)
+
+
+
+forest_dat <- do.call(rbind, result) %>%
+	mutate(age = rep(c("7", "15", "17"), each = nrow(result[[1]]))) %>%
+	mutate(facet_var = facet_var)
+
+
 ###PRODUCES A FOREST THAT ALLOWS VISUALISATION OF DATA - the metabolite conc differences are too large
 # Still not completely right
-pdf("outputs/Age_diff_met_conc_particle_only_forest.pdf", width = 15, height = 10)
-forestPlot(result, columns = 1)
+forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
+pdf("outputs/forests/Age_diff_met_conc_particle_only_forest.pdf", width = 15, height = 10)
+forest_plot(forest_dat, col_num = 2, group = "age", y_axis_var = "Metabolite", units = "Log10(median metabolite concentration)")
 dev.off()
 
 #--------------------------------
@@ -74,7 +104,10 @@ full_dat <- do.call(rbind, age_diff)
 full_dat$age <- c(rep(7, 149), rep(15, 149), rep(17, 149))
 
 kw_age_test <- kruskal.test(Estimate ~ age, data = full_dat) 
-kw_age_test #p = 0.8227 therefore no evidence of difference between age groups 
+kw_age_test #p = 0.8227 therefore no evidence of difference between log10 median values of each metabolite at different age groups
+
+
+colnames(met_dat)
 
 #Comparison of metabolite-GRS associations
 age_diff_reg <-  list()
@@ -84,16 +117,25 @@ for (i in unique(d[["age"]])) {
 	age_diff_reg[[as.character(i)]] <- linearRegress('CAD_score', nr_mnames[-c(150, 151)], temp_dat)
 }
 result <- age_diff_reg
-pdf("outputs/Age_diff_GRS_met_forest.pdf", width = 15, height = 10)
-forestPlot(result, columns = 4)
+
+stopifnot(result[[1]][["Metabolite"]] == result[[2]][["Metabolite"]] && result[[1]][["Metabolite"]] == result[[3]][["Metabolite"]])
+
+facet_var <- facet_var_gen(result[[1]], col_num = 4, group_num = 3)
+
+forest_dat <- do.call(rbind, result) %>%
+	mutate(age = rep(c("17", "15", "7"), each = nrow(result[[1]]))) %>%
+	mutate(facet_var = facet_var)
+
+forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
+
+pdf("outputs/forests/Age_diff_GRS_met_forest.pdf", width = 15, height = 10)
+forest_plot(forest_dat, col_num = 4, group = "age", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)")
 dev.off()
 
 full_dat2 <- do.call(rbind, age_diff_reg)
 full_dat2$age <- c(rep(17, 149), rep(15, 149), rep(7, 149))
 
 kw_age_test2 <- kruskal.test(Estimate ~ age, data = full_dat2) 
-aov_test <- aov(Estimate ~ as.factor(age), data = full_dat2)
-summary(aov_test)
 kw_age_test2 #p = 0.007643 therefore evidence of difference between age groups 
 dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = "bh")
 
