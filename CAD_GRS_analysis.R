@@ -59,7 +59,8 @@ particle <- particle[-which(particle %in% phospholipid)]
 
 groups <- list(cholesterol, phospholipid, triglyceride, tot_lipid, particle)
 names(groups) <- c("cholesterol", "phospholipid", "triglyceride", "tot_lipid", "particle")
-p <- list()
+
+#Generate the subsets 
 Large_VLDL <- c("xxl-VLDL", "xl-VLDL", "l-VLDL")
 Remnant_particles <- c("m-VLDL", "s-VLDL", "xs-VLDL", "IDL")
 LDL <- c("l-LDL", "m-LDL", "s-LDL")
@@ -67,13 +68,10 @@ V_Large_HDL <- c("xl-HDL")
 Large_HDL <- c("l-HDL", "m-HDL")
 Small_HDL <- "s-HDL"
 
-#Generate the subsets 
 subsets <- list(Large_VLDL, Remnant_particles, LDL, V_Large_HDL, Large_HDL, Small_HDL)
 names(subsets) <- c("Large_VLDL", "Remnant_particles", "LDL", "V_Large_HDL", "Large_HDL", "Small_HDL")
 
-#CAD_score_lr_nr_2 <- CAD_score_lr_nr
-#CAD_score_lr_nr$group <- NA
-#CAD_score_lr_nr <- CAD_score_lr_nr_2
+#Add groups and subsets to the data
 for (i in names(groups)) {
   CAD_score_lr_nr[CAD_score_lr_nr[["Metabolite"]] %in% groups[[i]], "group"] <- i
 }
@@ -94,14 +92,17 @@ for (j in names(subsets)) {
 CAD_score_lr_nr$group <- as.factor(CAD_score_lr_nr$group)
 CAD_score_lr_nr$subset <- as.factor(CAD_score_lr_nr$subset)
 
+#Remove metabolites not grouped (non-lipoproteins)
 dat <- CAD_score_lr_nr[-which(is.na(CAD_score_lr_nr$group)), ]
 
+#Create expected and observed p value columns (x and y)
 res_out <- dat %>%
   arrange(`Pr(>|t|)`) %>%
   mutate(exp_p = (1:nrow(.))/(nrow(.)+1)) %>%
   mutate(x = -log10(exp_p)) %>%
   mutate(y = -log10(`Pr(>|t|)`))
 
+#Create the plot
 l <- estlambda(res_out$`Pr(>|t|)`)
 nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = ", nrow(res_out), "\nlambda = ", round(l$estimate, 3), ", se = ", round(l$se, 3), sep = "")
   p <- ggplot(res_out, aes(x = x, y = y, group = group, colour = subset)) +
@@ -123,6 +124,7 @@ dev.off()
 #################################
 # Differences between subsets ###
 #################################
+#Boxplot looking at effect size differences between groups
 pdf("outputs/lipoprotein_subclass_effect_comparison.pdf", width = 15, height = 10)
 ggplot(res_out) +
   geom_boxplot(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset)) +
@@ -130,6 +132,7 @@ ggplot(res_out) +
   theme(text = element_text(size = 30), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL"))
 dev.off()
+#Testing for normality within group estimates
 shap_test <- vector(mode = "list", length = length(unique(res_out$subset)))
 names(shap_test) <- unique(res_out$subset)
 for (i in res_out$subset) {

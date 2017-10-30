@@ -135,10 +135,6 @@ source("R/Merge.R")
 d <- left_join(df_main, datafile_SNPs_W) %>%
   dplyr::select(u_ID, cidB9999, qlet, age, everything())
 d
-#Drop the SNPs as decided before 
-bad_SNPs <- c("rs11830157_w", "rs12976411_w")
-
-d <- dplyr::select(d, -one_of(bad_SNPs))
 
 #extract SNP names - as well as lipid SNPs 
 SNPs <-  colnames(d)[str_detect(colnames(d), "[\\d]_w$")] #try "\\d" in the square brackets
@@ -148,9 +144,6 @@ log_odd_SNP <- "rs6903956_w"
 
 #order the data by unique identifiers
 d <- arrange(d, cidB9999, qlet)
-
-#Age specific analysis - not done yet! 
-#source("R/Age_specific_analysis.R")
 
 length(mnames) - length(nr_mnames) #81
 
