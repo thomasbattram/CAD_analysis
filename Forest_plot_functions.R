@@ -14,7 +14,12 @@ facet_var_gen <- function (dat, col_num, group_num = 1) {
 		facet_var <- rep(rep(1:col_num, each = ceiling(nrow(dat) / col_num)), times = group_num)
 	}
 }
-
+dat <- forest_dat 
+col_num = 4 
+group = "age" 
+y_axis_var = "Metabolite"
+units = "Beta coefficient (95% CI)"
+title = NULL
 
 forest_plot <- function(dat, col_num, group = NA, y_axis_var, units = NULL, title = NULL) {
 #Format of data for plot (doesn't matter where in the data frame these things are and can have extra columns)
@@ -28,23 +33,27 @@ if (group_num == 0) {
 	group_num <- 1
 }
 
+met_num <- nrow(dat)/group_num/col_num
+
+#
 	#Produce a data frame that describes how the variables will be shaded
 	if ((nrow(dat) / group_num) %% 2 != 0) {
 		shading <- data.frame(
 				min = 
-					rep(c(rep(seq(from = 0.5, to = (length(unique(dat[[y_axis_var]])) + 1)/col_num, by = 1), times = col_num - 1),
-					seq(from = 0.5, to = floor((length(unique(dat[[y_axis_var]])) - 1) /col_num), by = 1)),
-					times = 3),
+					rep(c(rep(seq(from = 0.5, to = (met_num * col_num + 1)/col_num, by = 1), times = col_num - 1),
+					seq(from = 0.5, to = ((nrow(dat) - (ceiling(met_num) * group_num * (col_num - 1))) / group_num), by = 1)),
+					times = group_num),
 	            max = 
-	            	rep(c(rep(seq(from = 1.5, to = (length(unique(dat[[y_axis_var]])) + 1)/col_num + 0.5, by = 1), times = col_num - 1),
-					seq(from = 1.5, to = floor((length(unique(dat[[y_axis_var]])) - 1) /col_num) + 0.5, by = 1)),
-					times = 3),
+	            	rep(c(rep(seq(from = 1.5, to = (met_num * col_num + 1)/col_num + 1, by = 1), times = col_num - 1),
+					seq(from = 1.5, to = ((nrow(dat) - (ceiling(met_num) * group_num * (col_num - 1))) / group_num) + 1, by = 1)),
+					times = group_num),
 	            col = rep(c(0,1), length.out = nrow(dat)),
 	            facet_var = facet_var)
 	} else {
-		shading <- data.frame(min = rep(seq(from = 0.5, to = length(unique(dat[[y_axis_var]]))/col_num, by = 1), times = 6),
-	           	max = rep(seq(from = 1.5, to = length(unique(dat[[y_axis_var]]))/col_num + 0.5, by = 1), times = 6),
-	           	col = c(0,1))
+		shading <- data.frame(min = rep(seq(from = 0.5, to = met_num, by = 1), times = col_num * group_num),
+	           	max = rep(seq(from = 1.5, to = met_num + 1, by = 1), times = col_num * group_num),
+	           	col = rep(c(0,1), length.out = nrow(dat)),
+	            facet_var = facet_var)
 	}
 
 	#Minimum and maximum x values
