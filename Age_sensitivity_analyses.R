@@ -26,6 +26,7 @@ data <- met_dat[, 3]
 
 
 age_diff <- list()
+age_diff_not_log <- list()
 for (i in unique(met_dat[["age"]])) {
 	temp_dat <- filter(met_dat, age == i)
 	medians <- sapply(select(temp_dat, one_of(nr_mnames)), function(x) {median(x)})
@@ -35,12 +36,20 @@ for (i in unique(met_dat[["age"]])) {
 	up_quart <- sapply(select(temp_dat, one_of(nr_mnames)), function(x) {as.numeric(quantile(x, na.rm = TRUE)[4])})
 	log_up_quart <- log10(up_quart)
 
-	temp_out <- data.frame(log_med, log_low_quart, log_up_quart) %>%
+	temp_out_log <- data.frame(log_med, log_low_quart, log_up_quart) %>%
+		rownames_to_column()
+	colnames(temp_out_log) <- c("Metabolite", "Estimate", "2.5 %", "97.5 %")
+	temp_out_log <- filter(temp_out_log, !(Metabolite %in% c("glucose", "insulin"))) %>%
+		mutate(`Pr(>|t|)` = NA)
+	age_diff[[as.character(i)]] <- temp_out_log
+	
+	temp_out <- data.frame(medians, low_quart, up_quart) %>%
 		rownames_to_column()
 	colnames(temp_out) <- c("Metabolite", "Estimate", "2.5 %", "97.5 %")
 	temp_out <- filter(temp_out, !(Metabolite %in% c("glucose", "insulin"))) %>%
 		mutate(`Pr(>|t|)` = NA)
-	age_diff[[as.character(i)]] <- temp_out
+
+	age_diff_not_log[[as.character(i)]] <- temp_out
 }
 
 particle_mets <- nr_mnames[grep("-P$", nr_mnames)]
@@ -55,11 +64,6 @@ stopifnot(result[[1]][["Metabolite"]] == result[[2]][["Metabolite"]] && result[[
 source("R/Forest_plot_functions.R")
 
 facet_var <- facet_var_gen(result[[1]], col_num = 4, group_num = 3)
-
-forest_dat_2 <- do.call(rbind, result) 
-forest_dat_2 <- mutate(forest_dat_2, age = rep(c("7", "15", "17"), each = nrow(result[[1]]))) %>%
-	mutate(facet_var = facet_var)
-	
 
 forest_dat <- do.call(rbind, result) %>%
 	mutate(age = rep(c("7", "15", "17"), each = nrow(result[[1]]))) %>%
@@ -105,7 +109,6 @@ full_dat$age <- c(rep(7, 149), rep(15, 149), rep(17, 149))
 
 kw_age_test <- kruskal.test(Estimate ~ age, data = full_dat) 
 kw_age_test #p = 0.8227 therefore no evidence of difference between log10 median values of each metabolite at different age groups
-
 
 colnames(met_dat)
 
