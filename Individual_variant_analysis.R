@@ -160,7 +160,7 @@ hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
 ## p value PLOT
 #all SNPs vs no ratios metabs
 pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_pval.pdf"), width = 15, height = 10)
-heatmap.2( t(db), key = FALSE, breaks = b,  trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "none" , Colv =  Pden, Rowv = TRUE, ColSideColors = ColCol)
+heatmap.2( t(db), key = FALSE, breaks = b,  trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "column" , Colv =  Pden, Rowv = TRUE, ColSideColors = ColCol)
 dev.off()
 
 
@@ -180,7 +180,7 @@ db <- sapply(indi_SNP_results_nr, function(x) {out = x[, 1]; return(out)})
 rownames(db) <- rownames(indi_SNP_results_nr[[1]])
 
 #
-stopifnot(sum(temp_dat$Metabolite %in% rownames(db)) == 151)
+stopifnot(sum(temp_dat$Metabolite %in% rownames(db)) == length(nr_mnames))
 #
 
 #
@@ -218,7 +218,7 @@ rownames(db) <- rownames(indi_SNP_results_nr[[1]])
 
 
 #
-stopifnot(sum(temp_dat$Metabolite %in% rownames(db)) == 151)
+stopifnot(sum(temp_dat$Metabolite %in% rownames(db)) == length(nr_mnames))
 #
 
 #

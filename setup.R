@@ -150,9 +150,15 @@ length(mnames) - length(nr_mnames) #81
 
 #For age specific analyses
 if (age != "all") {
-  d <- filter(d, age == age)
+  d <- d[d[["age"]] == age, ]
   print(paste("The following analyses will be conducted at age", age, "only"))
 }
+
+if (age == 17) {
+  d <- dplyr::select(d, -insulin, -glucose)
+  nr_mnames <- nr_mnames[!(nr_mnames %in% c("insulin", "glucose"))]
+}
+
 
 print("setup complete - please proceed to the CAD-GRS analysis")
 

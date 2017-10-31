@@ -6,6 +6,9 @@ rm(list = ls())
 #Age the analysis is to be conducted at
 #If all ages make age "all"
 age <- "all"
+#age <- 7
+#age <- 15
+#age <- 17
 
 #########
 # Setup #
