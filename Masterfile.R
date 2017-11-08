@@ -40,6 +40,21 @@ source("R/New_GRS_analysis.R")
 source("R/HMGCR_SNP_analysis.R")
 
 
-#All ggplot graphs - larger writing
-#Heatmaps - add in gene names
+# Go through scripts and make them tidier
+# Check that they all run in sequence
+# Make it so that setup is the only thing that needs to be ran and each of the analysis steps can be ran without running the other steps
+# Add in the age sensitivity analysis
+# Add in the metabolite GWAS into the age sensitivity analysis
+# Go through to see how genetic data and metabolite data is read in
+# Don't want metabolite data that is currently read in to be what Hash did?
+# Check the HMGCR step in setup - why does there need to be a variable HMGCR_SNPs?
+
+
+
+
+
+
+
+
+
 
