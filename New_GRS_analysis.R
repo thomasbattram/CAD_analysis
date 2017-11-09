@@ -13,9 +13,14 @@ d[["sig_score"]] <- rowSums(d[, sig_SNPs])
 # Produce a score based on SNPs that didn't associate with any metabolites
 d[["non_sig_score"]] <- rowSums(d[, non_sig_SNPs])
 
-sig_score_lr_nr <- linearRegress('sig_score', nr_mnames, d)
+sig_score_lr_nr <- linearRegress('sig_score', nr_mnames, d, "age")
 
-non_sig_score_lr_nr <- linearRegress('non_sig_score', nr_mnames, d)
+non_sig_score_lr_nr <- linearRegress('non_sig_score', nr_mnames, d, "age")
+
+if (!(exists("CAD_score_lr_nr"))) {
+  d[["CAD_score"]] <- rowSums(d[, SNPs])
+  CAD_score_lr_nr <- linearRegress('CAD_score', nr_mnames, d, "age")
+}
 
 # ----------------------------------------------------------------------------
 # Plots
@@ -41,7 +46,7 @@ dev.off()
 
 # QQ 
 res_out <- cbind(CAD_score_lr_nr, sig_score_lr_nr$`Pr(>|t|)`, non_sig_score_lr_nr$`Pr(>|t|)`)
-colnames(res_out)[10:11] <- c("sig_P", "non_sig_P")
+colnames(res_out)[colnames(res_out) %in% c("sig_score_lr_nr$`Pr(>|t|)`", "non_sig_score_lr_nr$`Pr(>|t|)`")] <- c("sig_P", "non_sig_P")
 res_out <- res_out %>%
   mutate(exp_p = (1:nrow(.))/(nrow(.)+1)) %>%
   mutate(x = -log10(exp_p)) %>%
