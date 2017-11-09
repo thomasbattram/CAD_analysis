@@ -8,15 +8,6 @@ d[["CAD_score"]] <- rowSums(d[, SNPs])
 # Do the linear regression analysis 
 # ------------------------------------------------------------------
 
-
-source("R/Linear_regression_func.R")
-
-# Drop the SNP with a log odds ratio of 0
-SNPs <- SNPs %>%
-  .[!(. %in% log_odd_SNP)]
-
-d <- select(d, -one_of(log_odd_SNP))
-
 # Regress the metabolites on the CAD genetic risk score with age as a covariate
 CAD_score_lr_nr <- linearRegress('CAD_score', nr_mnames, d, "age")
 
@@ -45,49 +36,9 @@ dev.off()
 # ------------------------------------------------------------------
 # CAD-GRS vs. grouped lipoproteins qq 
 # ------------------------------------------------------------------
-# Generate the lipoprotein groups
-lipoproteins <- c(nr_mnames[grep("-V?[HIL]DL", nr_mnames)], nr_mnames[grep("IDL", nr_mnames)])
-est_tot <- lipoproteins[grep(pattern = "-C", lipoproteins)]
-free <- lipoproteins[grep(pattern = "-FC", lipoproteins)]
-cholesterol <- lipoproteins[lipoproteins %in% c(free, est_tot)]
-phospholipid <- lipoproteins[grep(pattern = "-PL", lipoproteins)]
-triglyceride <- lipoproteins[grep(pattern = "-TG", lipoproteins)]
-tot_lipid <- lipoproteins[grep(pattern = "L-L", lipoproteins)]
-particle <- lipoproteins[grep(pattern = "-P", lipoproteins)]
-particle <- particle[-which(particle %in% phospholipid)]
 
-groups <- list(cholesterol, phospholipid, triglyceride, tot_lipid, particle)
-names(groups) <- c("cholesterol", "phospholipid", "triglyceride", "tot_lipid", "particle")
+CAD_score_lr_nr <- left_join(CAD_score_lr_nr, subset_df)
 
-# Generate the subsets 
-Large_VLDL <- c("xxl-VLDL", "xl-VLDL", "l-VLDL")
-Remnant_particles <- c("m-VLDL", "s-VLDL", "xs-VLDL", "IDL")
-LDL <- c("l-LDL", "m-LDL", "s-LDL")
-V_Large_HDL <- c("xl-HDL") 
-Large_HDL <- c("l-HDL", "m-HDL")
-Small_HDL <- "s-HDL"
-
-subsets <- list(Large_VLDL, Remnant_particles, LDL, V_Large_HDL, Large_HDL, Small_HDL)
-names(subsets) <- c("Large_VLDL", "Remnant_particles", "LDL", "V_Large_HDL", "Large_HDL", "Small_HDL")
-
-# Add groups and subsets to the data
-for (i in names(groups)) {
-  CAD_score_lr_nr[CAD_score_lr_nr[["Metabolite"]] %in% groups[[i]], "group"] <- i
-}
-
-groups_2 <- list()
-for (j in names(subsets)) {
-    n <- subsets[[j]]
-    o <- list()
-    for (m in n) {
-      o[m] <- list(CAD_score_lr_nr[["Metabolite"]][grep(paste("\\b",m,sep=""), CAD_score_lr_nr[["Metabolite"]])])
-    }
-    names(o) <- NULL
-    groups_2[j] <- list(unlist(o))
-    for (k in names(groups_2)) {
-      CAD_score_lr_nr[CAD_score_lr_nr[["Metabolite"]] %in% groups_2[[k]], "subset"] <- k
-    }
-  }
 CAD_score_lr_nr$group <- as.factor(CAD_score_lr_nr$group)
 CAD_score_lr_nr$subset <- as.factor(CAD_score_lr_nr$subset)
 
@@ -132,6 +83,7 @@ p <- ggplot(res_out) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL"))
 print(p)
 dev.off()
+
 # Testing for normality within group estimates
 shap_test <- vector(mode = "list", length = length(unique(res_out$subset)))
 names(shap_test) <- unique(res_out$subset)
