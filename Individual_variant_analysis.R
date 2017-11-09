@@ -2,8 +2,6 @@
 # Individual variant-metabolite analysis 
 # ------------------------------------------------------------------
 
-source("R/Linear_regression_func.R")
-
 #drop the SNP with a log odds ratio of 0
 SNPs <- SNPs %>%
   .[!(. %in% log_odd_SNP)]
@@ -125,9 +123,6 @@ colnames(db) <- SNP_loci
 db <- db[order(row.names(db)), ]
 
 db <- as.matrix(db)
-head(db)
-# Set groups into different variables
-
 # Plot the heatmaps
 
 # Load Pre-computed Plotting variables
@@ -154,7 +149,6 @@ print("Individual variant analysis complete - please proceed to the New-GRS anal
 # Heatmap - beta-coef, biology-driven clustering
 # ----------------------------------------------------------------------------
 
-# Coefs
 db <- sapply(indi_SNP_results_nr, function(x) {out = x[, 1]; return(out)})
 
 rownames(db) <- rownames(indi_SNP_results_nr[[1]])
@@ -164,12 +158,13 @@ rownames(db) <- rownames(indi_SNP_results_nr[[1]])
 
 db <- as.data.frame(db) %>%
   mutate(Metabolite = rownames(.)) %>%
-  left_join(temp_dat) %>%
-  arrange(new_subset)
+  left_join(subset_df) %>%
+  arrange(subset)
 
 rownames(db) <- db[["Metabolite"]]
 
-db <- select(db, -one_of(colnames(temp_dat)))
+colnames(db)
+db <- select(db, -one_of(colnames(subset_df)))
 
 db <- as.matrix(db)
 
@@ -204,14 +199,14 @@ stopifnot(colnames(db) == unlist(str_split(SNP_loci, "_"))[seq(1, 110, by = 2)])
 colnames(db) <- SNP_loci
 
 db <- mutate(db, Metabolite = rownames(db)) %>%
-  left_join(temp_dat) %>%
-  arrange(new_subset)
+  left_join(subset_df) %>%
+  arrange(subset)
 colnames(db)
 
 
 rownames(db) <- db[["Metabolite"]]
 colnames(db)
-db <- select(db, -one_of(colnames(temp_dat)))
+db <- select(db, -one_of(colnames(subset_df)))
 colnames(db)
 db <- as.matrix(db)
 
