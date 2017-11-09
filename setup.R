@@ -39,6 +39,7 @@ library(data.table)
 library(gridExtra)
 library(FSA)
 
+source("R/Linear_regression_func.R")
 
 # ------------------------------------------------------------------
 # Read in all the data 
@@ -127,7 +128,7 @@ datafile_SNPs_W <- datafile_SNPs_W %>%
   dplyr::select(u_ID, everything())
 
 # ------------------------------------------------------------------
-# Merge the ages and finish setup
+# Merge the ages and and extract useful info
 # ------------------------------------------------------------------
 source("R/Merge.R")
 # merge 
@@ -137,6 +138,9 @@ d
 
 # Extract SNP names - as well as lipid SNPs 
 SNPs <-  colnames(d)[str_detect(colnames(d), "[\\d]_w$")] 
+
+lipoproteins <- c(nr_mnames[grep("-V?[HIL]DL", nr_mnames)], nr_mnames[grep("IDL", nr_mnames)])
+non_lipo <- nr_mnames[!(nr_mnames %in% lipoproteins)]
 
 # Save the name of the SNP that has a log(OR) of 0
 log_odd_SNP <- "rs6903956_w"
@@ -156,6 +160,38 @@ if (age == 17) {
   d <- dplyr::select(d, -insulin, -glucose)
   nr_mnames <- nr_mnames[!(nr_mnames %in% c("insulin", "glucose"))]
 }
+
+# ------------------------------------------------------------------
+# Generate biological subsets
+# ------------------------------------------------------------------
+# Generate the lipoprotein subsets 
+Large_VLDL <- grep(paste(c("xxl-VLDL", "xl-VLDL", "l-VLDL"), collapse = "|"), nr_mnames, value = TRUE)
+Remnant_particles <- grep(paste(c("m-VLDL", "s-VLDL", "xs-VLDL", "IDL"), collapse = "|"), nr_mnames, value = TRUE)
+LDL <- grep(paste(c("l-LDL", "m-LDL", "s-LDL"), collapse = "|"), nr_mnames, value = TRUE)
+V_Large_HDL <- grep(c("xl-HDL"), nr_mnames, value = TRUE) 
+Large_HDL <- grep(paste(c("l-HDL", "m-HDL"), collapse = "|"), nr_mnames, value = TRUE)
+Small_HDL <- grep("s-HDL", nr_mnames, value = TRUE)
+
+# Generate the other metabolite subsets
+diameter <- non_lipo[grep("-D", non_lipo)]
+cholesterol <- non_lipo[grep("-C$", non_lipo)]
+glycerides <- non_lipo[grep("-TG$", non_lipo)]
+phospholipids <- c("DAG", "Tot-PG", "PC", "Tot-Cho")
+apolipo <- non_lipo[grep("Apo", non_lipo)]
+fatty_acids <- c("Tot-FA", "FALen", "UnsatDeg", "DHA", "LA", "CLA", "FAw3", "FAw6", "PUFA", "MUFA", "SFA")
+amino_acids <- c("Ala", "Gln", "His", "Ile", "Leu", "Val", "Phe", "Tyr")
+glycolysis <- c("Glc", "Lac", "Pyr", "Cit", "glucose", "insulin")
+other <- c("Ace", "AcAce", "bOHBut", "Crea", "Alb", "Gp")
+
+subsets <- list(Large_VLDL, Remnant_particles, LDL, V_Large_HDL, Large_HDL, Small_HDL, diameter, cholesterol, glycerides, phospholipids, apolipo, fatty_acids, amino_acids, glycolysis, other)
+names(subsets) <- c("Large_VLDL", "Remnant_particles", "LDL", "V_Large_HDL", "Large_HDL", "Small_HDL", "diameter", "cholesterol", "glycerides", "phospholipids", "apolipo", "fatty_acids", "amino_acids", "glycolysis", "other")
+
+subset_df <- data.frame(Metabolite = nr_mnames, subset = NA)
+
+for (i in names(subsets)) {
+  subset_df[subset_df[["Metabolite"]] %in% get(i), "subset"] <- i
+}
+
 
 
 print("setup complete - please proceed to the CAD-GRS analysis")
