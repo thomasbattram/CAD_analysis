@@ -52,11 +52,12 @@ datafile_metabs <- read_dta("inputs/metabolite_data.dta")
 
 
 ## NT: I assume they would get the HMGCR data with the rest
-datafile_SNPs <- read_dta("inputs/genotype_data.dta") #was New_Genotype_Sorted_dosage_genotype_data
+## NT: In what form will they receive the genetic data? - Could just note down what form I have it in?
+datafile_SNPs <- read_dta("inputs/genotype_data.dta") # was New_Genotype_Sorted_dosage_genotype_data
+datafile_SNPs <- datafile_SNPs %>%
+  mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
+  select(u_ID, everything())
 #HMGCR_SNPs <- read_dta("/Volumes/tb13101/Desktop/Mini-project 1/CAD_GRS_analysis/New_genotype_dosage_data/HMGCR/HMGCR_sorted_data.dta")
-#datafile_SNPs <- datafile_SNPs %>%
-  #mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-  #select(u_ID, everything())
 #HMGCR_SNPs <- HMGCR_SNPs %>%
   #mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
   #select(u_ID, everything())
