@@ -2,8 +2,6 @@
 # HMGCR SNP analysis 
 # ----------------------------------------------------------------------------
 
-source("R/Linear_regression_func.R")
-
 HMGCR_SNP_results_nr <- lapply(HMGCR_SNPs, function(x) {linearRegress(x, nr_mnames, d)})
 
 names(HMGCR_SNP_results_nr) <- HMGCR_SNPs
