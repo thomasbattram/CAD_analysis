@@ -186,10 +186,27 @@ other <- c("Ace", "AcAce", "bOHBut", "Crea", "Alb", "Gp")
 subsets <- list(Large_VLDL, Remnant_particles, LDL, V_Large_HDL, Large_HDL, Small_HDL, diameter, cholesterol, glycerides, phospholipids, apolipo, fatty_acids, amino_acids, glycolysis, other)
 names(subsets) <- c("Large_VLDL", "Remnant_particles", "LDL", "V_Large_HDL", "Large_HDL", "Small_HDL", "diameter", "cholesterol", "glycerides", "phospholipids", "apolipo", "fatty_acids", "amino_acids", "glycolysis", "other")
 
-subset_df <- data.frame(Metabolite = nr_mnames, subset = NA)
+subset_df <- data.frame(Metabolite = nr_mnames, subset = NA, group = NA)
 
 for (i in names(subsets)) {
   subset_df[subset_df[["Metabolite"]] %in% get(i), "subset"] <- i
+}
+
+# Generate the lipoprotein groups
+est_tot <- lipoproteins[grep(pattern = "-C", lipoproteins)]
+free <- lipoproteins[grep(pattern = "-FC", lipoproteins)]
+cholesterol <- lipoproteins[lipoproteins %in% c(free, est_tot)]
+phospholipid <- lipoproteins[grep(pattern = "-PL", lipoproteins)]
+triglyceride <- lipoproteins[grep(pattern = "-TG", lipoproteins)]
+tot_lipid <- lipoproteins[grep(pattern = "L-L", lipoproteins)]
+particle <- lipoproteins[grep(pattern = "-P", lipoproteins)]
+particle <- particle[-which(particle %in% phospholipid)]
+
+groups <- list(cholesterol, phospholipid, triglyceride, tot_lipid, particle)
+names(groups) <- c("cholesterol", "phospholipid", "triglyceride", "tot_lipid", "particle")
+
+for (i in names(groups)) {
+  subset_df[subset_df[["Metabolite"]] %in% groups[[i]], "group"] <- i
 }
 
 
