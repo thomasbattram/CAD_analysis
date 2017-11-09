@@ -147,12 +147,38 @@ kw_age_test2 <- kruskal.test(Estimate ~ age, data = full_dat2)
 kw_age_test2 #p = 0.007643 therefore evidence of difference between age groups 
 dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = "bh")
 
-
 # Kettunen GWAS res
-met_GWAS <- read.delim("inputs/Kettunen_met_GWAS.tsv")
-head(met_GWAS)
+library(TwoSampleMR)
+ao <- available_outcomes()
+ao[grep("Kettunen", ao$author), ]
+
+# Going to need to change the results in the main analysis so they represent an increase in metabolite conc for sd increase in score
+# Or an increase in metabolite SD for an increase in score - try both
+# How can this be done when we don't have individual level data?
+# - Can't produce a score from summary stats...
+# - Could look at just SNPs that are "significantly" associated with mets in our study
+# - Could potentially meta-analyse the results for these SNPs...
+
+library(MRInstruments)
+data(metab_qtls)
+head(metab_qtls)
 
 
 
+GWAS_met_labs <- unique(metab_qtls$phenotype)
+GWAS_met_labs %in% nr_mnames
+sort(nr_mnames)
+# Not in nr_mnames:
+mets_to_remove <- c("Bis.DB.ratio", "Bis.FA.ratio", "CH2.DB.ratio", "CH2.in.FA", "DB.in.FA", "FAw79S")
+GWAS_met_labs <- GWAS_met_labs[!(GWAS_met_labs %in% mets_to_remove)]
+GWAS_met_labs <- gsub("\\.", "-", GWAS_met_labs)
+GWAS_met_labs[!(tolower(GWAS_met_labs) %in% tolower(nr_mnames))] # Metabs in GWAS, but not in our data
+# TotPG and otPUFA needs to be renamed
+GWAS_met_labs[GWAS_met_labs %in% "otPUFA"] <- "PUFA"
+GWAS_met_labs[GWAS_met_labs %in% "TotPG"] <- "Tot-PG"
+
+mets_to_keep <- nr_mnames[tolower(nr_mnames) %in% tolower(GWAS_met_labs)]
+
+head(metab_qtls)
 
 
