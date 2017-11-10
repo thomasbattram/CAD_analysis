@@ -66,11 +66,15 @@ save(Pden, ColCol, file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 # Produce a colour variable based on biological grouping
 # ------------------------------------------------------------------
 
+# Going to have to order the subset_df file as well as the subsets by metabolite and then make ColCol2..
+
 CC2 <- sample(colorRampPalette(brewer.pal(9, "Set1"))(length(subsets)))
 names(CC2) <- c(names(subsets))
 
-K2 <- subset_df[["Metabolite"]]
-names(K2) <- subset_df[["subset"]]
+ordered_df <- arrange(subset_df, subset)
+
+K2 <- ordered_df[["Metabolite"]]
+names(K2) <- ordered_df[["subset"]]
 
 ColCol2 <- CC2[names(K2)]
 
