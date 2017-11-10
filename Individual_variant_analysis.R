@@ -68,164 +68,59 @@ saveWorkbook(workbook, file = paste0("outputs/tables/", as.character(age), "/FDR
 # Heatmap - beta-coef, data-driven clustering
 # ------------------------------------------------------------------
 source("R/Dendrogram_production.R")
-
-# Extract the beta-coefficients 
-db <- sapply(indi_SNP_results_nr, function(x) {out = x[, 1]; return(out)})
-
-rownames(db) <- rownames(indi_SNP_results_nr[[1]])
-
-
-# Put the metabolites in order
-db <- as.data.frame(db)
-
-db <- db[order(row.names(db)), ]
-
-db <- as.matrix(db)
-
-# Plot the heatmaps
-
-# Load Pre-computed Plotting variables
-# (Metabolite Clusters From ALSPAC Data and Metabolite Cluster ColorScheme)
 load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
-ColCol[names(ColCol) %in% 1] <- "white"
-
-# For the colour key scale - allows clearer visualisation of associations
-b <- seq(from = -5, to = 5, by = 1)
-
-# Plotting Colors
-hmcol <- colorRampPalette(brewer.pal(9, "RdBu"))
 
 
-# All SNPs vs no ratios metabs 
-pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_coef.pdf"), width = 15, height = 10)
-heatmap.2( t(db), breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "both" , Colv =  Pden, Rowv = TRUE, ColSideColors = ColCol)
-dev.off()
+# Produce heatmaps using differing cluster methods and effect values
+cluster_method <- c("data_driven", "biological")
+data_type <- c("Pr(>|t|)", "Estimate")
 
+for (i in 1:2) {
+  data <- data_type[i]
+  db <- sapply(indi_SNP_results_nr, function(x) {out = x[, data]; return(out)})
+  rownames(db) <- rownames(indi_SNP_results_nr[[1]])
+  db <- as.data.frame(db) %>%
+    mutate(Metabolite = rownames(.)) %>%
+    left_join(subset_df) %>%
+    arrange(subset)
 
-# ------------------------------------------------------------------
-#	Heatmap - P values, data-driven clustering
-# ------------------------------------------------------------------
-db <- sapply(indi_SNP_results_nr, function(x) {out = x[, 4]; return(out)})
+  rownames(db) <- db[["Metabolite"]]
 
-rownames(db) <- rownames(indi_SNP_results_nr[[1]])
+  db <- select(db, -one_of(colnames(subset_df)))
 
-SNP_loci <- SNP_info %>%
-  filter(Lead_variant %in% colnames(db))
+  # Extract variables required for heatmap function
+  if (data == "Estimate") {
+    b <- seq(from = -5, to = 5, by = 1)
+    hmcol <- colorRampPalette(brewer.pal(9, "RdBu"))
+    key <- TRUE
+  } else if (data == "Pr(>|t|)") {
+    b <- c(0, 1e-8, 1e-6, 1e-4, 1e-2, 0.05, .25, 0.5, 0.75, 1) 
+    hmcol <- brewer.pal(11, "Spectral")[1:5]
+    sig <- brewer.pal(11, "Spectral")[1:5]
+    hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
+    key <- FALSE
+  }
+  for (j in 1:2) {
+    cluster <- cluster_method[j]
+    if (cluster == "data_driven") {
+      ColCol[names(ColCol) %in% 1] <- "white"
+      Colv <- Pden
+      den <- "both"
+      ColSC <- ColCol
+      fin_dat <- db[order(row.names(db)), ]
+    } else if (cluster == "biological") {
+      ColCol2[names(ColCol2) == "Other"] <- "white"
+      Colv <- FALSE
+      den <- "none"
+      ColSC <- ColCol2
+      fin_dat <- db
+    }
+    fin_dat <- as.matrix(fin_dat)
 
-SNP_loci <- paste(SNP_loci$Lead_variant, SNP_loci$Locus, sep = "_")
-
-# Put the metabolites in order
-db <- as.data.frame(db)
-
-db <- select(db, sort(colnames(db)))
-colnames(db) <- SNP_loci
-
-db <- db[order(row.names(db)), ]
-
-db <- as.matrix(db)
-# Plot the heatmaps
-
-# Load Pre-computed Plotting variables
-# (Metabolite Clusters From ALSPAC Data and Metabolite Cluster ColorScheme)
-load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
-ColCol[names(ColCol) %in% 1] <- "white"
- 
-b <- c(0, 1e-8, 1e-6, 1e-4, 1e-2, 0.05, .25, 0.5, 0.75, 1)
-
-# Plotting Colors
-hmcol <- brewer.pal(11, "Spectral")[1:5]
-sig <- brewer.pal(11, "Spectral")[1:5]
-hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
-
-# P value plot
-# All SNPs vs no ratios metabs
-pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_pval.pdf"), width = 15, height = 10)
-heatmap.2( t(db), key = FALSE, breaks = b,  trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "column" , Colv =  Pden, Rowv = TRUE, ColSideColors = ColCol)
-dev.off()
-
-print("Individual variant analysis complete - please proceed to the New-GRS analysis")
-
-# ----------------------------------------------------------------------------
-# Heatmap - beta-coef, biology-driven clustering
-# ----------------------------------------------------------------------------
-
-db <- sapply(indi_SNP_results_nr, function(x) {out = x[, 1]; return(out)})
-
-rownames(db) <- rownames(indi_SNP_results_nr[[1]])
-
-
-#stopifnot(sum(temp_dat$Metabolite %in% rownames(db)) == length(nr_mnames))
-
-db <- as.data.frame(db) %>%
-  mutate(Metabolite = rownames(.)) %>%
-  left_join(subset_df) %>%
-  arrange(subset)
-
-rownames(db) <- db[["Metabolite"]]
-
-colnames(db)
-db <- select(db, -one_of(colnames(subset_df)))
-
-db <- as.matrix(db)
-
-b <- seq(from = -5, to = 5, by = 1)
-
-ColCol2[names(ColCol2) == "Other"] <- "white"
-
-# Plotting Colors
-hmcol <- colorRampPalette(brewer.pal(9, "RdBu"))
-
-pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_coef_TEST.pdf"), width = 15, height = 10)
-heatmap.2( t(db), breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "row", Colv = FALSE, Rowv = TRUE, ColSideColors = ColCol2)
-dev.off()
-
-
-# ----------------------------------------------------------------------------
-# Heatmap - P values, biology-driven clustering
-# ----------------------------------------------------------------------------
-db <- sapply(indi_SNP_results_nr, function(x) {out = x[, 4]; return(out)})
-
-rownames(db) <- rownames(indi_SNP_results_nr[[1]])
-
-#stopifnot(sum(temp_dat$Metabolite %in% rownames(db)) == length(nr_mnames))
-
-db <- as.data.frame(db) %>%
-  select(sort(colnames(db)))
-
-# Sanity check
-stopifnot(colnames(db) == unlist(str_split(SNP_loci, "_"))[seq(1, 110, by = 2)])
-
-# Add in gene names
-colnames(db) <- SNP_loci
-
-db <- mutate(db, Metabolite = rownames(db)) %>%
-  left_join(subset_df) %>%
-  arrange(subset)
-colnames(db)
-
-
-rownames(db) <- db[["Metabolite"]]
-colnames(db)
-db <- select(db, -one_of(colnames(subset_df)))
-colnames(db)
-db <- as.matrix(db)
-
-
-b <- c(0, 1e-8, 1e-6, 1e-4, 1e-2, 0.05, .25, 0.5, 0.75, 1)
-
-# Plotting Colors
-hmcol <- brewer.pal(11, "Spectral")[1:5]
-sig <- brewer.pal(11, "Spectral")[1:5]
-hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
-
-pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_pval_TEST.pdf"), width = 15, height = 10)
-heatmap.2( t(db), key = FALSE, breaks = b, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = "none", Colv = FALSE, Rowv = TRUE, ColSideColors = ColCol2, lwid = c(0.1, 4), lhei = c(0.1, 4, 1))
-dev.off()
-
-
-
-
-
-
+    pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
+    heatmap.2( t(fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC)
+    dev.off()
+  }
+}
 
 
