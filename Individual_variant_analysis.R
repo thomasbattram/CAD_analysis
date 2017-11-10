@@ -65,7 +65,7 @@ for (i in names_sig_nr_FDR) {
 saveWorkbook(workbook, file = paste0("outputs/tables/", as.character(age), "/FDR_significant_SNP-metab_associations.xlsx"), overwrite = TRUE)
 
 # ------------------------------------------------------------------
-# Heatmap - beta-coef, data-driven clustering
+# Heatmaps
 # ------------------------------------------------------------------
 source("R/Dendrogram_production.R")
 load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
