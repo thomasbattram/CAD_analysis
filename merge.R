@@ -2,7 +2,7 @@
 # Merging the metabolite data across ages  
 # ------------------------------------------------------------------
 
-## Run this script as part of setup.R! 
+## Run this script as part of setup.R
 
 stopifnot(exists("datafile_metabs"))
 
@@ -18,7 +18,7 @@ datafile_metabs <- datafile_metabs %>%
 ## NB: This step just changes the metabolite names in the data.frame so they are 
 ##     more readable in tables and graphs
 
-# Name metabolites that are named OK in the metabolite dataset
+# Name metabolites with appropriate labels in the dataset
 fine_mets <- c("DAG", "PC", "ApoA1", "ApoB", "FALen", "UnsatDeg", "DHA", "LA", "CLA", "FAw3", "FAw6", "PUFA", "MUFA", "SFA", "Glc", "Lac", "Pyr", "Cit", "Ala", "Gln", "His", "Ile", "Leu", "Val", "Phe", "Tyr", "Ace", "AcAce", "bOHBut", "Crea", "Alb", "Gp", "glucose", "insulin")
 # Name the lipoproteins that don't have a size suffix
 diff_lipos <- c("VLDLD", "LDLD", "HDLD", "VLDLC", "LDLC", "HDLC", "HDL2C", "HDL3C", "VLDLTG", "LDLTG", "HDLTG")

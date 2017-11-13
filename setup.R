@@ -45,13 +45,8 @@ source("R/Linear_regression_func.R")
 # Read in all the data 
 # ------------------------------------------------------------------
 
-# Set working directory for file with everything in
-#setwd("CAD_adolescent_analysis")
-
 datafile_metabs <- read_dta("inputs/metabolite_data.dta") 
 
-
-## NT: I assume they would get the HMGCR data with the rest
 ## NT: In what form will they receive the genetic data? - Could just note down what form I have it in?
 datafile_SNPs <- read_dta("inputs/genotype_data.dta") # was New_Genotype_Sorted_dosage_genotype_data
 datafile_SNPs <- datafile_SNPs %>%
@@ -90,7 +85,6 @@ for (i in 1:nrow(genotype_alleles)) {
 }
 
 HMGCR_SNPs <- c("rs17238484", "rs12916")
-#SNP_info <- filter(SNP_info, !(Lead_variant %in% HMGCR_SNPs))
 
 SNP_info <- arrange(SNP_info, Lead_variant)
 genotype_alleles <- arrange(genotype_alleles, SNP)
@@ -108,22 +102,19 @@ rev_SNPs <- c(rev_SNPs, HMGCR_SNPs)
 
 datafile_SNPs_W <- datafile_SNPs
 
-#This loop changes the coding of the alleles so that the dosages all reflect the dosage of effect
-#allele received by each individual then weights each SNP dosage
+# Change the coding of effect alleles where needed and weight the SNPs
 other_headers <- c("u_ID", "cidB9999", "qlet", HMGCR_SNPs)
 headers <- colnames(datafile_SNPs_W)[!(colnames(datafile_SNPs_W) %in% other_headers)]
 for (i in headers) {
-  #Changes allele codings
+  # Changes allele codings
   if (i %in% rev_SNPs) {
     datafile_SNPs_W[[i]] <- 2 - datafile_SNPs_W[[i]]
   }
-  #Weights the SNPs
+  # Weights the SNPs
   weight <- subset(SNP_Ws, leadvariant == i)
   new_col_name <- paste(i, "_w", sep = "")
   datafile_SNPs_W[[new_col_name]] <- datafile_SNPs_W[[i]] * weight[[2]]
 }
-#datafile_SNPs_W[[HMGCR_SNPs[1]]] <- 2 - datafile_SNPs_W[[HMGCR_SNPs[1]]]
-#datafile_SNPs_W[[HMGCR_SNPs[2]]] <- 2 - datafile_SNPs_W[[HMGCR_SNPs[2]]]
 datafile_SNPs_W <- datafile_SNPs_W %>%
   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
   dplyr::select(u_ID, everything())

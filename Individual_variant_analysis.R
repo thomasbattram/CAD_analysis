@@ -2,7 +2,7 @@
 # Individual variant-metabolite analysis 
 # ------------------------------------------------------------------
 
-#drop the SNP with a log odds ratio of 0
+# drop the SNP with a log odds ratio of 0
 SNPs <- SNPs %>%
   .[!(. %in% log_odd_SNP)]
 

@@ -158,10 +158,15 @@ ao[grep("Kettunen", ao$author), ]
 # - Can't produce a score from summary stats...
 # - Could look at just SNPs that are "significantly" associated with mets in our study
 # - Could potentially meta-analyse the results for these SNPs...
+# Need to remove normalisation of metabolites - check Kettunen methods - i.e. did he log metabs etc. 
 
 library(MRInstruments)
 data(metab_qtls)
 head(metab_qtls)
+
+# Producing per sd increase values
+sd_score <- sd(d[["CAD_score"]], na.rm = TRUE)
+CAD_score_lr_nr[["Estimate_per_sd"]] <- CAD_score_lr_nr[["Estimate"]] * sd_score
 
 
 
@@ -179,6 +184,21 @@ GWAS_met_labs[GWAS_met_labs %in% "TotPG"] <- "Tot-PG"
 
 mets_to_keep <- nr_mnames[tolower(nr_mnames) %in% tolower(GWAS_met_labs)]
 
-head(metab_qtls)
+SNPs_to_test <- SNP_names[SNP_names %in% metab_qtls[["SNP"]] & SNP_names %in% names(sig_nr_FDR)]
+
+SNP_sds <- vector(mode = "numeric", length = length(SNPs_to_test))
+names(SNP_sds) <- SNPs_to_test
+for (i in SNPs_to_test) {
+	SNP_sds[i] <- sd(d[[i]], na.rm = TRUE)
+}
+
+# Test
+child_res <- indi_SNP_results_nr[[SNPs_to_test]] %>%
+	filter(Metabolite %in% mets_to_keep) %>%
+	mutate(Estimate_per_sd = Estimate * SNP_sds)
+
+
+
+
 
 

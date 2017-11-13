@@ -3,8 +3,8 @@
 # ----------------------------------------------------------------------------
 
 # Read in variants 
-sig_SNPs <- read.delim(paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), stringsAsFactors = F, header = F)
-#sig_SNPs <- read.delim("outputs/FDR_significant_SNPs.txt")
+#sig_SNPs <- read.delim(paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), stringsAsFactors = F, header = F)
+sig_SNPs <- read.delim(paste0("outputs/other/", as.character(age), "/FDR_significant_SNPs.txt"), stringsAsFactors = F, header = F)
 sig_SNPs <- paste(sig_SNPs[[1]], "_w", sep = "")
 non_sig_SNPs <- SNPs[!(SNPs %in% sig_SNPs)]
 
