@@ -23,6 +23,11 @@ forest_plot <- function(dat, col_num, group = NA, y_axis_var, units = NULL, titl
 # ----------  ----     --    --- 
 # ----------  ----     --    ---
 
+require("tidyverse")
+require("gridExtra")
+require("ggplot2")
+
+
 group_num <- length(unique(dat[[group]]))
 if (group_num == 0) {
 	group_num <- 1
