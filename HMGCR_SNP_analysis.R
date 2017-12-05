@@ -35,7 +35,26 @@ extract_sig_hits <- function(data, type = "bon") {
 }
 
 sig_nr <- extract_sig_hits(HMGCR_SNP_results_nr)
+for (i in names(sig_nr)) {
+  sig_nr[[i]] <- sig_nr[[i]] %>%
+    arrange(`Pr(>|t|)`) %>%
+    mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
+    mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
+    mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
+    mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
+    dplyr::select(Metabolite, `Estimate (95% CI)`, P)
+}
+
 sig_nr_FDR <- extract_sig_hits(HMGCR_SNP_results_nr, type = "fdr")
+for (i in names(sig_nr_FDR)) {
+  sig_nr_FDR[[i]] <- sig_nr_FDR[[i]] %>%
+    arrange(`Pr(>|t|)`) %>%
+    mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
+    mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
+    mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
+    mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
+    dplyr::select(Metabolite, `Estimate (95% CI)`, P)
+}
 
 # ----------------------------------------------------------------------------
 # Make tables of results
