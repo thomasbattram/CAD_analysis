@@ -116,22 +116,14 @@ make_pretty <- function (num, digits) {
 }
 
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
-  mutate(P = `Pr(>|t|)`) %>%
+  mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
   mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
   mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
-  mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ",", up_CI, ")")) %>%
+  mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
   dplyr::select(Metabolite, `Estimate (95% CI)`, P)
 
 write.table(CAD_tab, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
-# ------------------------------------------------------------------
-# subsets table 
-# ------------------------------------------------------------------
-sub_tab <- res_out %>%
-  arrange(subset) %>%
-  select(Metabolite, subset, group)
-
-write.table(sub_tab, file = paste0("outputs/tables/", as.character(age), "/subset_table.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
 median(abs(CAD_score_lr_nr$Estimate))
 

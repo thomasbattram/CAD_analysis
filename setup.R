@@ -211,7 +211,7 @@ for (i in names(groups)) {
   subset_df[subset_df[["Metabolite"]] %in% groups[[i]], "group"] <- i
 }
 
-
+write.table(subset_df, file = "outputs/tables/subset_table.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 
 print("setup complete - please proceed to the CAD-GRS analysis")
 
