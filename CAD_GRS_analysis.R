@@ -110,8 +110,19 @@ CAD_assoc <- CAD_score_lr_nr %>%
 length(lipoproteins)  
 sum(lipoproteins %in% CAD_assoc$Metabolite)
 
-CAD_score_lr_nr <- arrange(CAD_score_lr_nr, `Pr(>|t|)`)
-write.table(CAD_score_lr_nr, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
+# For tables and forests
+make_pretty <- function (num, digits) {
+  formatC(signif(num, digits), digits = digits, format = "fg", flag = "#")
+}
+
+CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
+  mutate(P = `Pr(>|t|)`) %>%
+  mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
+  mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
+  mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ",", up_CI, ")")) %>%
+  dplyr::select(Metabolite, `Estimate (95% CI)`, P)
+
+write.table(CAD_tab, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
 # ------------------------------------------------------------------
 # subsets table 
