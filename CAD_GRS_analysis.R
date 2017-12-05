@@ -59,7 +59,7 @@ nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = "
     geom_point(aes(shape = factor(group)), size = 3) +
     geom_abline(slope = 1, intercept = 0, colour = "red") +
     #ggtitle(nom) +
-    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20)) +
+    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), legend.title = element_blank()) +
     labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P))) #+
     #theme(legend.position = "right") +
     #scale_colour_manual(name = element_blank(),
