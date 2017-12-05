@@ -131,6 +131,16 @@ d
 # Extract SNP names - as well as lipid SNPs 
 SNPs <-  colnames(d)[str_detect(colnames(d), "[\\d]_w$")] 
 
+# Removing the SNPs that didn't meet genome-wide significance in Nikpay et al. paper
+#SNP_to_rm <- c("rs273909", "rs6903956", "rs17609940", "rs10953541", "rs264", "rs2954029", "rs964184", "rs9319428", "rs17514846", "rs216172", "rs12936587", "rs46522")
+#SNP_to_rm <- paste0(SNP_to_rm, "_w")
+
+#SNPs <- SNPs[!(SNPs %in% SNP_to_rm)]
+
+#d <- d[, !(colnames(d) %in% SNP_to_rm)]
+
+
+
 lipoproteins <- c(nr_mnames[grep("-V?[HIL]DL", nr_mnames)], nr_mnames[grep("IDL", nr_mnames)])
 non_lipo <- nr_mnames[!(nr_mnames %in% lipoproteins)]
 
