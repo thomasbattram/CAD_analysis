@@ -41,6 +41,11 @@ library(FSA)
 
 source("R/Linear_regression_func.R")
 
+# For tables
+make_pretty <- function (num, digits) {
+  formatC(signif(num, digits), digits = digits, format = "fg", flag = "#")
+}
+
 # ------------------------------------------------------------------
 # Read in all the data 
 # ------------------------------------------------------------------

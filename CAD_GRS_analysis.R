@@ -110,10 +110,6 @@ CAD_assoc <- CAD_score_lr_nr %>%
 length(lipoproteins)  
 sum(lipoproteins %in% CAD_assoc$Metabolite)
 
-# For tables and forests
-make_pretty <- function (num, digits) {
-  formatC(signif(num, digits), digits = digits, format = "fg", flag = "#")
-}
 
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
