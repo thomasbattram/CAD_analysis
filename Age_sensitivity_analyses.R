@@ -147,7 +147,73 @@ kw_age_test2 <- kruskal.test(Estimate ~ age, data = full_dat2)
 kw_age_test2 #p = 0.007643 therefore evidence of difference between age groups 
 dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = "bh")
 
+# ----------------------------------------------------------------------------
+# qq-plot for association between CAD-GRS and metabolites at each age
+# ----------------------------------------------------------------------------
+# full_dat2
+
+# rownames(full_dat2) <- NULL
+# # QQ 
+# res_out <- select(full_dat2, age, `Pr(>|t|)`, Metabolite) %>%
+# 	spread(key = age, value = `Pr(>|t|)`) %>%
+# 	mutate(exp_p = (1:nrow(.))/(nrow(.)+1)) %>%
+# 	mutate(x = -log10(exp_p)) %>%
+# 	mutate(y.7 = -log10(sort(`7`))) %>%
+# 	mutate(y.15 = -log10(sort(`15`))) %>%
+# 	mutate(y.17 = -log10(sort(`17`)))
+
+# #l <- list(estlambda(res_out$`Pr(>|t|)`), estlambda(res_out$sig_P), estlambda(res_out$non_sig_P))
+# #nom <- paste("CAD scores vs. all metabolites", "\n", "number of tests = ", nrow(res_out), "\nTotal score: lambda = ", round(l[[1]]$estimate, 3), ", se = ", round(l[[1]]$se, 3), "\nsig score: lambda = ", round(l[[2]]$estimate, 3), ", se = ", round(l[[2]]$se, 3), "\nNon-sig score: lambda = ", round(l[[3]]$estimate, 3), ", se = ", round(l[[3]]$se, 3), sep = "")
+# p <- ggplot(res_out, aes(x = x, y = y.7)) +
+#   geom_point(aes(colour = "7")) +
+#   geom_point(aes(x = x, y = y.15, colour = "15")) +
+#   geom_point(aes(x = x, y = y.17, colour = "17")) +
+#   geom_abline(slope = 1, intercept = 0, colour = "red") +
+#   scale_colour_discrete(breaks = c("7", "15", "17")) +
+#   #ggtitle(nom) +
+#   theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 15)) +
+#   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)), colour = "Age")
+# pdf(paste0("outputs/other/3_ages_CAD-GRS_vs_metabs_qq.pdf"), width = 20, height = 10)
+# print(p)
+# dev.off()
+
+# ----------------------------------------------------------------------------
+# Age group differences using biological groupings
+# ----------------------------------------------------------------------------
+
+res_out <- left_join(full_dat2, subset_df) %>%
+	filter(group != "NA")
+
+# Would be nice if could change this so that the ages are in order...
+p <- ggplot(arrange(res_out, age), aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = as.character(sort(age)))) +
+  geom_boxplot() +
+  labs(x = "Particle size class", y = "Relative effect estimate", legend = "Age") +
+  theme(text = element_text(size = 25), axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL")) +
+  scale_fill_discrete(name = "Age")
+pdf("outputs/other/age_strat_lipoprotein_subclass_effect_comparison.pdf",width = 15, height = 10)
+print(p)
+dev.off()
+
+kw_est <- vector(mode = "list", length = length(unique(res_out$subset)))
+names(kw_est) <- unique(res_out$subset)
+dunn_est <- vector(mode = "list", length = length(unique(res_out$subset)))
+names(dunn_est) <- unique(res_out$subset)
+for (i in unique(res_out$subset)) {
+	temp_dat <- filter(res_out, subset == i)
+	kw_est[[i]] <- kruskal.test(Estimate ~ age, data = temp_dat) 
+	dunn_est[[i]] <- dunnTest(Estimate ~ as.factor(age), data = temp_dat, method = "bh")
+}
+
+kw_age_test2 <- kruskal.test(Estimate ~ age, data = full_dat2) 
+kw_age_test2 #p = 0.007643 therefore evidence of difference between age groups 
+dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = "bh")
+
+
+
+# ----------------------------------------------------------------------------
 # Kettunen GWAS res
+# ----------------------------------------------------------------------------
 library(TwoSampleMR)
 ao <- available_outcomes()
 ao[grep("Kettunen", ao$author), ]
