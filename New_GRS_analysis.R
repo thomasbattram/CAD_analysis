@@ -9,13 +9,13 @@ sig_SNPs <- paste(sig_SNPs[[1]], "_w", sep = "")
 non_sig_SNPs <- SNPs[!(SNPs %in% sig_SNPs)]
 
 # Produce a score based on SNPs that associated with 1 or more metabolite
-d[["sig_score"]] <- rowSums(d[, sig_SNPs])
+d[["metabo_GRS"]] <- rowSums(d[, sig_SNPs])
 # Produce a score based on SNPs that didn't associate with any metabolites
-d[["non_sig_score"]] <- rowSums(d[, non_sig_SNPs])
+d[["residual_GRS"]] <- rowSums(d[, non_sig_SNPs])
 
-sig_score_lr_nr <- linearRegress('sig_score', nr_mnames, d, "age")
+metabo_GRS_lr_nr <- linearRegress('metabo_GRS', nr_mnames, d, "age")
 
-non_sig_score_lr_nr <- linearRegress('non_sig_score', nr_mnames, d, "age")
+residual_GRS_lr_nr <- linearRegress('residual_GRS', nr_mnames, d, "age")
 
 if (!(exists("CAD_score_lr_nr"))) {
   d[["CAD_score"]] <- rowSums(d[, SNPs])
@@ -28,14 +28,14 @@ if (!(exists("CAD_score_lr_nr"))) {
 
 # Forest 
 source("R/Forest_plot_functions.R")
-non_sig_score_lr_nr <- arrange(non_sig_score_lr_nr, Metabolite)
-sig_score_lr_nr <- arrange(sig_score_lr_nr, Metabolite)
+residual_GRS_lr_nr <- arrange(residual_GRS_lr_nr, Metabolite)
+metabo_GRS_lr_nr <- arrange(metabo_GRS_lr_nr, Metabolite)
 CAD_score_lr_nr <- arrange(CAD_score_lr_nr, Metabolite)
-stopifnot(nrow(CAD_score_lr_nr) == nrow(sig_score_lr_nr) && nrow(CAD_score_lr_nr) == nrow(sig_score_lr_nr))
+stopifnot(nrow(CAD_score_lr_nr) == nrow(metabo_GRS_lr_nr) && nrow(CAD_score_lr_nr) == nrow(metabo_GRS_lr_nr))
 
 facet_var <- facet_var_gen(CAD_score_lr_nr, col_num = 4, group_num = 3)
-forest_dat <- rbind(CAD_score_lr_nr[, 1:7], sig_score_lr_nr, non_sig_score_lr_nr) %>%
-  mutate(score = rep(c("CAD", "sig", "non_sig"), each = nrow(CAD_score_lr_nr))) %>%
+forest_dat <- rbind(CAD_score_lr_nr[, 1:7], metabo_GRS_lr_nr, residual_GRS_lr_nr) %>%
+  mutate(score = rep(c("Total", "Metabolite", "Residual"), each = nrow(CAD_score_lr_nr))) %>%
   mutate(facet_var = facet_var)
 
 forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
@@ -45,8 +45,8 @@ dev.off()
 
 
 # QQ 
-res_out <- cbind(CAD_score_lr_nr, sig_score_lr_nr$`Pr(>|t|)`, non_sig_score_lr_nr$`Pr(>|t|)`)
-colnames(res_out)[colnames(res_out) %in% c("sig_score_lr_nr$`Pr(>|t|)`", "non_sig_score_lr_nr$`Pr(>|t|)`")] <- c("sig_P", "non_sig_P")
+res_out <- cbind(CAD_score_lr_nr, metabo_GRS_lr_nr$`Pr(>|t|)`, residual_GRS_lr_nr$`Pr(>|t|)`)
+colnames(res_out)[colnames(res_out) %in% c("metabo_GRS_lr_nr$`Pr(>|t|)`", "residual_GRS_lr_nr$`Pr(>|t|)`")] <- c("sig_P", "non_sig_P")
 res_out <- res_out %>%
   mutate(exp_p = (1:nrow(.))/(nrow(.)+1)) %>%
   mutate(x = -log10(exp_p)) %>%
@@ -58,10 +58,10 @@ l <- list(estlambda(res_out$`Pr(>|t|)`), estlambda(res_out$sig_P), estlambda(res
 nom <- paste("CAD scores vs. all metabolites", "\n", "number of tests = ", nrow(res_out), "\nTotal score: lambda = ", round(l[[1]]$estimate, 3), ", se = ", round(l[[1]]$se, 3), "\nsig score: lambda = ", round(l[[2]]$estimate, 3), ", se = ", round(l[[2]]$se, 3), "\nNon-sig score: lambda = ", round(l[[3]]$estimate, 3), ", se = ", round(l[[3]]$se, 3), sep = "")
 p <- ggplot(res_out, aes(x = x, y = y.CAD)) +
   geom_point(aes(colour = "Total GRS (56 variants)")) +
-  geom_point(aes(x = x, y = y.sig, colour = "New GRS (7 variants)")) +
+  geom_point(aes(x = x, y = y.sig, colour = "Metabolite GRS (7 variants)")) +
   geom_point(aes(x = x, y = y.non_sig, colour = "Residual GRS (49 variants)")) +
   geom_abline(slope = 1, intercept = 0, colour = "red") +
-  scale_colour_discrete(breaks = c("New GRS (7 variants)", "Total GRS (56 variants)", "Residual GRS (49 variants)")) +
+  scale_colour_discrete(breaks = c("Metabolite GRS (7 variants)", "Total GRS (56 variants)", "Residual GRS (49 variants)")) +
   #ggtitle(nom) +
   theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20)) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)), colour = "Genetic risk score")
@@ -72,15 +72,15 @@ dev.off()
 # ----------------------------------------------------------------------------
 # Association tests 
 # ----------------------------------------------------------------------------
-sig_score_assoc <- sig_score_lr_nr %>%
+metabo_GRS_assoc <- metabo_GRS_lr_nr %>%
   mutate(Bonferroni = p.adjust(`Pr(>|t|)`, method = "bonferroni")) %>%
   mutate(FDR = p.adjust(`Pr(>|t|)`, method = "fdr")) %>%
   filter(FDR < 0.05)
 
-summary(sig_score_lr_nr)
-median(abs(sig_score_lr_nr$Estimate))
+summary(metabo_GRS_lr_nr)
+median(abs(metabo_GRS_lr_nr$Estimate))
 
-non_sig_score_assoc <- non_sig_score_lr_nr %>%
+residual_GRS_assoc <- residual_GRS_lr_nr %>%
   mutate(Bonferroni = p.adjust(`Pr(>|t|)`, method = "bonferroni")) %>%
   mutate(FDR = p.adjust(`Pr(>|t|)`, method = "fdr")) %>%
   filter(FDR < 0.05)
