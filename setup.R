@@ -65,7 +65,7 @@ datafile_SNPs <- datafile_SNPs %>%
 #write.dta(datafile_SNPs, "inputs/genotype_data.dta")
 
 # The SNPs and their weightings
-SNP_Ws <- read_dta("inputs/SNP_weightings.dta") #was SNPs and log_odd_weightings_new_genotype
+#SNP_Ws <- read_dta("inputs/SNP_weightings.dta") #was SNPs and log_odd_weightings_new_genotype
 
 SNP_info <- read_excel("inputs/SNP_info.xlsx")
 colnames(SNP_info) <- c("Locus", "Lead_variant", "A1", "A2", "A1_freq", "OR", "logOR")
@@ -116,9 +116,9 @@ for (i in headers) {
     datafile_SNPs_W[[i]] <- 2 - datafile_SNPs_W[[i]]
   }
   # Weights the SNPs
-  weight <- subset(SNP_Ws, leadvariant == i)
+  weight <- subset(SNP_info, Lead_variant == i)
   new_col_name <- paste(i, "_w", sep = "")
-  datafile_SNPs_W[[new_col_name]] <- datafile_SNPs_W[[i]] * weight[[2]]
+  datafile_SNPs_W[[new_col_name]] <- datafile_SNPs_W[[i]] * weight[["logOR"]]
 }
 datafile_SNPs_W <- datafile_SNPs_W %>%
   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
