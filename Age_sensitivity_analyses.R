@@ -214,54 +214,78 @@ dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = 
 # ----------------------------------------------------------------------------
 # Kettunen GWAS res
 # ----------------------------------------------------------------------------
-library(TwoSampleMR)
-ao <- available_outcomes()
-ao[grep("Kettunen", ao$author), ]
+# library(TwoSampleMR)
+# ao <- available_outcomes()
+# ao[grep("Kettunen", ao$author), ]
 
-# Going to need to change the results in the main analysis so they represent an increase in metabolite conc for sd increase in score
-# Or an increase in metabolite SD for an increase in score - try both
-# How can this be done when we don't have individual level data?
-# - Can't produce a score from summary stats...
-# - Could look at just SNPs that are "significantly" associated with mets in our study
-# - Could potentially meta-analyse the results for these SNPs...
-# Need to remove normalisation of metabolites - check Kettunen methods - i.e. did he log metabs etc. 
+# # Going to need to change the results in the main analysis so they represent an increase in metabolite conc for sd increase in score
+# # Or an increase in metabolite SD for an increase in score - try both
+# # How can this be done when we don't have individual level data?
+# # - Can't produce a score from summary stats...
+# # - Could look at just SNPs that are "significantly" associated with mets in our study
+# # - Could potentially meta-analyse the results for these SNPs...
+# # Need to remove normalisation of metabolites - check Kettunen methods - i.e. did he log metabs etc. 
 
-library(MRInstruments)
-data(metab_qtls)
-head(metab_qtls)
+# library(MRInstruments)
+# data(metab_qtls)
+# head(metab_qtls)
 
-# Producing per sd increase values
-sd_score <- sd(d[["CAD_score"]], na.rm = TRUE)
-CAD_score_lr_nr[["Estimate_per_sd"]] <- CAD_score_lr_nr[["Estimate"]] * sd_score
+# # Making a new metabolite dataset with log-transformed metabs
+# met_dat <- df_main_not_transformed %>%
+# 	dplyr::select(u_ID, age, everything())
+
+# for (i in mnames) {
+#   df_main_not_transformed[[i]] <- as.numeric(df_main_not_transformed[[i]])
+#   df_main_not_transformed[[i]] <- log(df_main_not_transformed[[i]])
+# }
+
+# log_d <- left_join(df_main_not_transformed, datafile_SNPs_W) %>%
+#   dplyr::select(u_ID, cidB9999, qlet, age, everything())
+
+# log_d <- arrange(log_d, cidB9999, qlet)
+
+# log_d[["CAD_score"]] <- rowSums(d[, SNPs])
+
+# # Regress the metabolites on the CAD genetic risk score with age as a covariate
+# CAD_score_lr_nr2 <- linearRegress('CAD_score', nr_mnames, log_d, "age")
+
+
+# met_dat[, -c(1,2)]
+# colnames(met_dat)
+
+
+# # Producing per sd increase values
+# sd_score <- sd(d[["CAD_score"]], na.rm = TRUE)
+# CAD_score_lr_nr[["Estimate_per_sd"]] <- CAD_score_lr_nr[["Estimate"]] * sd_score
 
 
 
-GWAS_met_labs <- unique(metab_qtls$phenotype)
-GWAS_met_labs %in% nr_mnames
-sort(nr_mnames)
-# Not in nr_mnames:
-mets_to_remove <- c("Bis.DB.ratio", "Bis.FA.ratio", "CH2.DB.ratio", "CH2.in.FA", "DB.in.FA", "FAw79S")
-GWAS_met_labs <- GWAS_met_labs[!(GWAS_met_labs %in% mets_to_remove)]
-GWAS_met_labs <- gsub("\\.", "-", GWAS_met_labs)
-GWAS_met_labs[!(tolower(GWAS_met_labs) %in% tolower(nr_mnames))] # Metabs in GWAS, but not in our data
-# TotPG and otPUFA needs to be renamed
-GWAS_met_labs[GWAS_met_labs %in% "otPUFA"] <- "PUFA"
-GWAS_met_labs[GWAS_met_labs %in% "TotPG"] <- "Tot-PG"
+# GWAS_met_labs <- unique(metab_qtls$phenotype)
+# GWAS_met_labs %in% nr_mnames
+# sort(nr_mnames)
+# # Not in nr_mnames:
+# mets_to_remove <- c("Bis.DB.ratio", "Bis.FA.ratio", "CH2.DB.ratio", "CH2.in.FA", "DB.in.FA", "FAw79S")
+# GWAS_met_labs <- GWAS_met_labs[!(GWAS_met_labs %in% mets_to_remove)]
+# GWAS_met_labs <- gsub("\\.", "-", GWAS_met_labs)
+# GWAS_met_labs[!(tolower(GWAS_met_labs) %in% tolower(nr_mnames))] # Metabs in GWAS, but not in our data
+# # TotPG and otPUFA needs to be renamed
+# GWAS_met_labs[GWAS_met_labs %in% "otPUFA"] <- "PUFA"
+# GWAS_met_labs[GWAS_met_labs %in% "TotPG"] <- "Tot-PG"
 
-mets_to_keep <- nr_mnames[tolower(nr_mnames) %in% tolower(GWAS_met_labs)]
+# mets_to_keep <- nr_mnames[tolower(nr_mnames) %in% tolower(GWAS_met_labs)]
 
-SNPs_to_test <- SNP_names[SNP_names %in% metab_qtls[["SNP"]] & SNP_names %in% names(sig_nr_FDR)]
+# SNPs_to_test <- SNP_names[SNP_names %in% metab_qtls[["SNP"]] & SNP_names %in% names(sig_nr_FDR)]
 
-SNP_sds <- vector(mode = "numeric", length = length(SNPs_to_test))
-names(SNP_sds) <- SNPs_to_test
-for (i in SNPs_to_test) {
-	SNP_sds[i] <- sd(d[[i]], na.rm = TRUE)
-}
+# SNP_sds <- vector(mode = "numeric", length = length(SNPs_to_test))
+# names(SNP_sds) <- SNPs_to_test
+# for (i in SNPs_to_test) {
+# 	SNP_sds[i] <- sd(d[[i]], na.rm = TRUE)
+# }
 
-# Test
-child_res <- indi_SNP_results_nr[[SNPs_to_test]] %>%
-	filter(Metabolite %in% mets_to_keep) %>%
-	mutate(Estimate_per_sd = Estimate * SNP_sds)
+# # Test
+# child_res <- indi_SNP_results_nr[[SNPs_to_test]] %>%
+# 	filter(Metabolite %in% mets_to_keep) %>%
+# 	mutate(Estimate_per_sd = Estimate * SNP_sds)
 
 
 
