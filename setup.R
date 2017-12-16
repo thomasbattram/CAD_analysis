@@ -152,7 +152,7 @@ non_lipo <- nr_mnames[!(nr_mnames %in% lipoproteins)]
 # Save the name of the SNP that has a log(OR) of 0
 log_odd_SNP <- "rs6903956_w"
 
-# Rrder the data by unique identifiers
+# Re-order the data by unique identifiers
 d <- arrange(d, cidB9999, qlet)
 
 length(mnames) - length(nr_mnames) #81
