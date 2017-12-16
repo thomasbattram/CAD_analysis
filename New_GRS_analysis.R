@@ -79,6 +79,13 @@ metabo_GRS_assoc <- metabo_GRS_lr_nr %>%
 
 summary(metabo_GRS_lr_nr)
 median(abs(metabo_GRS_lr_nr$Estimate))
+median(abs(CAD_score_lr_nr$Estimate))
+
+metabo_and_CAD <- rbind(metabo_GRS_lr_nr, CAD_score_lr_nr[, 1:7]) %>%
+  mutate(score = rep(c("metabo", "CAD"), each = 151))
+
+wt <- wilcox.test(Estimate ~ score, data = metabo_and_CAD)
+wt # P = 1.374e-13
 
 residual_GRS_assoc <- residual_GRS_lr_nr %>%
   mutate(Bonferroni = p.adjust(`Pr(>|t|)`, method = "bonferroni")) %>%
