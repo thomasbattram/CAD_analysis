@@ -2,10 +2,14 @@ README file
 
 R files for analysis of the association between coronary artery disease genetic risk and the metabolome in adolescence
 
-Before starting the analyses run make_directories.sh using the command below in your working directory:
-bash make_directories.sh
+Before starting the analyses make the directories needed:
+inputs
+R
+outputs
 
-Running Masterfile.R will complete all of the analyses once you have run make_directories.sh, please note the prerequisites below
+Then clone these files into the R directory 
+
+Running Masterfile.R will complete all of the analyses once you have made the directories, please note the prerequisites below
 
 Prerequisites:
 - All R files taken from github should be stored in the R directory
