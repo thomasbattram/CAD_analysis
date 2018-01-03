@@ -9,5 +9,5 @@ Prerequisites:
 - The genotype data should be in dosage (bgen) format - if not parts of the R script will have to be altered 
 - All packages should be installed from the setup.R script
 - The Individual_variant_analysis.R script needs to be ran once before the New_GRS_analysis.R script
-- Within outputs directories named "forests", "tables", "heatmaps" and "other" will need to be made if you are to follow the scripts exactly - of course where the results are outputted and the names of the outputs can be easily changed within the scripts
+- Within "outputs", make directories named "forests", "tables", "heatmaps" and "other" will need to be made if you are to follow the scripts exactly - of course where the results are outputted and the names of the outputs can be easily changed within the scripts
 
