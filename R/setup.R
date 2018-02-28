@@ -109,8 +109,8 @@ datafile_SNPs_W <- datafile_SNPs
 
 # Change the coding of effect alleles where needed and weight the SNPs
 other_headers <- c("u_ID", "cidB9999", "qlet", HMGCR_SNPs)
-headers <- colnames(datafile_SNPs_W)[!(colnames(datafile_SNPs_W) %in% other_headers)]
-for (i in headers) {
+variants <- SNP_info$Lead_variant[!(SNP_info$Lead_variant %in% HMGCR_SNPs)]
+for (i in variants) {
   # Changes allele codings
   if (i %in% rev_SNPs) {
     datafile_SNPs_W[[i]] <- 2 - datafile_SNPs_W[[i]]
