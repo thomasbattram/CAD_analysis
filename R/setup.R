@@ -51,6 +51,7 @@ make_pretty <- function (num, digits) {
 # ------------------------------------------------------------------
 
 datafile_metabs <- read_dta("inputs/metabolite_data.dta") 
+#datafile_metabs <- datafile_metabs[, -grep(paste("glucose", "insulin", sep = "|"), colnames(datafile_metabs))]
 
 ## NT: In what form will they receive the genetic data? - Could just note down what form I have it in?
 datafile_SNPs <- read_dta("inputs/genotype_data.dta") # was New_Genotype_Sorted_dosage_genotype_data

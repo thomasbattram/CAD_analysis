@@ -19,7 +19,7 @@ datafile_metabs <- datafile_metabs %>%
 ##     more readable in tables and graphs
 
 # Name metabolites with appropriate labels in the dataset
-fine_mets <- c("DAG", "PC", "ApoA1", "ApoB", "FALen", "UnsatDeg", "DHA", "LA", "CLA", "FAw3", "FAw6", "PUFA", "MUFA", "SFA", "Glc", "Lac", "Pyr", "Cit", "Ala", "Gln", "His", "Ile", "Leu", "Val", "Phe", "Tyr", "Ace", "AcAce", "bOHBut", "Crea", "Alb", "Gp", "glucose", "insulin")
+fine_mets <- c("DAG", "PC", "ApoA1", "ApoB", "FALen", "UnsatDeg", "DHA", "LA", "CLA", "FAw3", "FAw6", "PUFA", "MUFA", "SFA", "Glc", "Lac", "Pyr", "Cit", "Ala", "Gln", "His", "Ile", "Leu", "Val", "Phe", "Tyr", "Ace", "AcAce", "bOHBut", "Crea", "Alb", "Gp")
 # Name the lipoproteins that don't have a size suffix
 diff_lipos <- c("VLDLD", "LDLD", "HDLD", "VLDLC", "LDLC", "HDLC", "HDL2C", "HDL3C", "VLDLTG", "LDLTG", "HDLTG")
 new_diff_lipos <- paste(
@@ -75,10 +75,10 @@ df_main <- df_list[[1]] %>%
 # Add in age
 df_main[["age"]] <- 7
 
-df_tf3_gluc <- df_list[[2]] %>%
-  select(u_ID, glucose, insulin)
+# df_tf3_gluc <- df_list[[2]] %>%
+#   select(u_ID, glucose, insulin)
 
-df_main <- left_join(df_main, df_tf3_gluc)
+# df_main <- left_join(df_main, df_tf3_gluc)
 
 df_tf3 <- df_list[[2]] %>%
   .[complete.cases(.), ] %>%
@@ -93,8 +93,8 @@ df_tf4 <- df_list[[3]] %>%
   .[!(.[[1]] %in% df_main[[1]]), ]
 
 # Add in glucose and insulin to age 17 as missing - was only measured at age 15
-df_tf4[["glucose"]] <- NA
-df_tf4[["insulin"]] <- NA
+# df_tf4[["glucose"]] <- NA
+# df_tf4[["insulin"]] <- NA
 df_tf4[["age"]] <- 17
 df_main <- rbind(df_main, df_tf4)
 # Test to see if an individual is represented more than once in the dataset
@@ -104,7 +104,7 @@ HDL_sub <- c("HDL-2C", "HDL-3C")
 colnames(df_main)[colnames(df_main) %in% HDL_sub] <- c("HDL2-C", "HDL3-C")
 
 # Extract metabolite names and metabolites that aren't ratios
-mnames <- colnames(df_main)[-c(1, 232)]
+mnames <- colnames(df_main)[-c(1, ncol(df_main))]
 
 nr_mnames <- mnames[-grep("_P|/", mnames)]
 
