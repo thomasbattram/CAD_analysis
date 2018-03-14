@@ -2,11 +2,6 @@
 # Individual variant-metabolite analysis 
 # ------------------------------------------------------------------
 
-# drop the SNP with a log odds ratio of 0
-SNPs <- SNPs %>%
-  .[!(. %in% log_odd_SNP)]
-
-d <- select(d, -one_of(log_odd_SNP))
 
 indi_SNP_results_nr <- lapply(SNPs, function(x) {linearRegress(x, nr_mnames, d)})
 
@@ -54,11 +49,23 @@ names_sig_nr_FDR <- names(sig_nr_FDR)
 write.table(names_sig_nr, paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
 write.table(names_sig_nr_FDR, paste0("outputs/other/", as.character(age), "/FDR_significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
 
+CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
+  mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
+  mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
+  mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
+  mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
+  dplyr::select(Metabolite, `Estimate (95% CI)`, P)
+
 workbook <- createWorkbook()
 for (i in names_sig_nr_FDR) {
   temp_dat <- sig_nr_FDR[[i]] %>%
-    select(Metabolite, everything()) %>%
-    arrange(`Pr(>|t|)`)
+    mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
+    mutate(FDR = make_pretty(FDR, 3)) %>%
+    mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
+    mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
+    mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
+    dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR) %>%
+    arrange(P)
   addWorksheet(wb = workbook, sheetName = i, gridLines = TRUE)
   writeDataTable(wb = workbook, sheet = i, x = temp_dat)
 }

@@ -16,7 +16,7 @@ facet_var_gen <- function (dat, col_num, group_num = 1) {
 }
 
 
-forest_plot <- function(dat, col_num, group = NA, y_axis_var, units = NULL, title = NULL) {
+forest_plot <- function(dat, col_num, group = NA, y_axis, units = NULL, title = NULL, scale = 1, null_at = 1, text_size = "norm", meta = FALSE) {
 #Format of data for plot (doesn't matter where in the data frame these things are and can have extra columns)
 # y_axis_var Estimate 2.5 % 97.5 % 
 # ----------  ----     --    ---
@@ -27,6 +27,18 @@ require("tidyverse")
 require("gridExtra")
 require("ggplot2")
 
+if (text_size == "norm") {
+	text_size <- NULL
+}
+
+if (meta) {
+	if (!("meta" %in% colnames(dat))) {
+		stop("Please include a column called meta in your data.frame")
+	}
+	shape <- "meta" 
+} else {
+	shape <- NULL
+}
 
 group_num <- length(unique(dat[[group]]))
 if (group_num == 0) {
@@ -56,37 +68,73 @@ met_num <- nrow(dat)/group_num/col_num
 	            facet_var = facet_var)
 	}
 
-	#Minimum and maximum x values
-	min_val <- floor(min(dat[["2.5 %"]]))
-	max_val <- ceiling(max(dat[["97.5 %"]]))
+	# Minimum and maximum x values
+	if (scale == 1) {
+		min_val <- floor(min(dat[["2.5 %"]], na.rm = T)) 
+		max_val <- ceiling(max(dat[["97.5 %"]], na.rm = T))
+	} else {
+		min_val <- round(min(dat[["2.5 %"]], na.rm = T), digits = 6) - scale
+		max_val <- round(max(dat[["97.5 %"]], na.rm = T), digits = 6) + scale
+	}
 
+
+	if (null_at <= min_val) {
+		min_val <- null_at
+	} else if (null_at >= max_val) {
+		max_val <- null_at
+	} else {
+		min_val <- min_val
+		max_val <- max_val
+	}
 	#Produce all the plots separately
+	y_axis_var <- y_axis[1]
+
 	plots <- list()
+	i=1
 	for (i in 1:col_num) {
 		test_forest_dat <- filter(dat, facet_var == i)
 		test_shading_dat <- filter(shading, facet_var == i)
+		
+		test_forest_dat[[y_axis_var]] <- factor(test_forest_dat[[y_axis_var]], levels = test_forest_dat[[y_axis_var]][1:(nrow(test_forest_dat) / group_num)])
+
+		labels <- test_forest_dat[[y_axis[1]]]
+		if (length(y_axis) > 1) {
+			for (j in 2:length(y_axis)) {
+				labels <- paste(labels, test_forest_dat[[y_axis[j]]], sep = "\n")
+			}
+		}
+
 		plots[[i]] <- ggplot(test_forest_dat) +
-		geom_point(aes_string(x = y_axis_var, y = "Estimate", ymin = "`2.5 %`", ymax = "`97.5 %`", colour = group, group = group), position=position_dodge(width = 0.9)) +
+		geom_point(aes_string(x = y_axis_var, y = "Estimate", ymin = "`2.5 %`", ymax = "`97.5 %`", colour = group, group = group, shape = shape, size = shape), position=position_dodge(width = 0.9)) +
 		geom_rect(data = test_shading_dat, aes(xmin = min, xmax = max, ymin = -Inf, ymax = Inf, fill = factor(col)) ) +
 		scale_fill_manual(values = c("white", "gray80")) +
-		geom_pointrange(aes_string(x = y_axis_var, y = "Estimate", ymin = "`2.5 %`", ymax = "`97.5 %`", colour = group, group = group), position=position_dodge(width = 0.9)) +
-		geom_hline(yintercept = 0) +
-		theme(axis.title.y = element_blank(), axis.title.x = element_blank(), legend.position = "none") +
+		geom_pointrange(aes_string(x = y_axis_var, y = "Estimate", ymin = "`2.5 %`", ymax = "`97.5 %`", colour = group, group = group, shape = shape, size = shape), position=position_dodge(width = 0.9)) +
+		geom_hline(yintercept = null_at) +
+		theme(axis.title.y = element_blank(), axis.title.x = element_blank(), legend.position = "none", text = element_text(size = text_size)) +
 		scale_y_continuous(limit = c(min_val, max_val)) +
+		scale_x_discrete(labels = labels) +
+		scale_size_manual(values = c(0.75, 1.5)) +
 		coord_flip()
 	}
 
 	#Produce the legend for the plot
-	legend <- cowplot::get_legend(
-		ggplot(dat) +
+	legend <- ggplot(dat) +
 		geom_point(aes_string(x = y_axis_var, y = "Estimate", ymin = "`2.5 %`", ymax = "`97.5 %`", colour = group, group = group), position=position_dodge(width = 0.9)) +
 		scale_fill_manual(values = c("white", "gray80")) +
 		geom_pointrange(aes_string(x = y_axis_var, y = "Estimate", ymin = "`2.5 %`", ymax = "`97.5 %`", colour = group, group = group), position=position_dodge(width = 0.9)) +
-		theme(legend.direction = "vertical", legend.justification = "center", legend.title = element_blank())
-	)
+		scale_size_manual(values = c(0.75, 1.5)) +
+		theme(legend.direction = "vertical", legend.justification = "center", legend.title = element_blank(), text = element_text(size = text_size))
 
+	if (group_num > 1) {
+		if (!is.factor(dat[[group]])) {
+			stop("The group needs to be a factor")
+		}
+		legend <- legend + scale_colour_hue(breaks = rev(levels(dat[[group]]))) 
+	}
+	legend <- cowplot::get_legend(legend)
 
-	marrangeGrob(plots, right = legend, bottom = units, top = title, ncol = col_num, nrow = 1, newpage = FALSE)
+	p <- marrangeGrob(plots, right = legend, bottom = units, top = title, ncol = col_num, nrow = 1)
+	return(p)
 }
 
 

@@ -15,7 +15,7 @@ source("R/Linear_regression_func.R")
 
 # For tables
 make_pretty <- function (num, digits) {
-  formatC(signif(num, digits), digits = digits, format = "fg", flag = "#")
+  as.numeric(formatC(signif(num, digits), digits = digits, format = "fg", flag = "#"))
 }
 
 # ------------------------------------------------------------------
@@ -29,15 +29,6 @@ datafile_SNPs <- read_dta("inputs/genotype_data.dta") # was New_Genotype_Sorted_
 datafile_SNPs <- datafile_SNPs %>%
   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
   select(u_ID, everything())
-#HMGCR_SNPs <- read_dta("/Volumes/tb13101/Desktop/Mini-project 1/CAD_GRS_analysis/New_genotype_dosage_data/HMGCR/HMGCR_sorted_data.dta")
-#HMGCR_SNPs <- HMGCR_SNPs %>%
-  #mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-  #select(u_ID, everything())
-
-#write.dta(datafile_SNPs, "inputs/genotype_data.dta")
-
-# The SNPs and their weightings
-#SNP_Ws <- read_dta("inputs/SNP_weightings.dta") #was SNPs and log_odd_weightings_new_genotype
 
 SNP_info <- read_excel("inputs/SNP_info.xlsx")
 colnames(SNP_info) <- c("Locus", "Lead_variant", "A1", "A2", "A1_freq", "OR", "logOR")
@@ -121,9 +112,6 @@ SNPs <-  colnames(d)[str_detect(colnames(d), "[\\d]_w$")]
 lipoproteins <- c(nr_mnames[grep("-V?[HIL]DL", nr_mnames)], nr_mnames[grep("IDL", nr_mnames)])
 non_lipo <- nr_mnames[!(nr_mnames %in% lipoproteins)]
 
-# Save the name of the SNP that has a log(OR) of 0
-log_odd_SNP <- "rs6903956_w"
-
 # Re-order the data by unique identifiers
 d <- arrange(d, cidB9999, qlet)
 
@@ -148,7 +136,7 @@ Large_VLDL <- grep(paste(c("xxl-VLDL", "xl-VLDL", "l-VLDL"), collapse = "|"), nr
 Remnant_particles <- grep(paste(c("m-VLDL", "s-VLDL", "xs-VLDL", "IDL"), collapse = "|"), nr_mnames, value = TRUE)
 LDL <- grep(paste(c("l-LDL", "m-LDL", "s-LDL"), collapse = "|"), nr_mnames, value = TRUE)
 V_Large_HDL <- grep(c("xl-HDL"), nr_mnames, value = TRUE) 
-Large_HDL <- grep(paste(c("l-HDL", "m-HDL"), collapse = "|"), nr_mnames, value = TRUE)
+Large_HDL <- grep(paste(c("^l-HDL", "m-HDL"), collapse = "|"), nr_mnames, value = TRUE)
 Small_HDL <- grep("s-HDL", nr_mnames, value = TRUE)
 
 # Generate the other metabolite subsets

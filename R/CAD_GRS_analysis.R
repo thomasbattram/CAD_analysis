@@ -20,7 +20,6 @@ res_out <- CAD_score_lr_nr %>%
   mutate(x = -log10(exp_p)) %>%
   mutate(y = -log10(sort(`Pr(>|t|)`)))
 
-## NT: worth putting the inflation factor?
 l <- list(estlambda(res_out$`Pr(>|t|)`))
 nom <- paste("CAD scores vs. all metabolites", "\n", "number of tests = ", nrow(res_out), "\nlambda = ", round(l[[1]]$estimate, 3), ", se = ", round(l[[1]]$se, 3), sep = "") 
 p <- ggplot(res_out, aes(x = x, y = y)) +
@@ -44,6 +43,8 @@ CAD_score_lr_nr$subset <- as.factor(CAD_score_lr_nr$subset)
 
 # Remove metabolites not grouped (non-lipoproteins)
 dat <- CAD_score_lr_nr[-which(is.na(CAD_score_lr_nr$group)), ]
+str(dat)
+dat$subset <- factor(dat$subset, levels = c("LDL", "Remnant_particles", "Large_VLDL", "Small_HDL", "Large_HDL", "V_Large_HDL"))
 
 # Create expected and observed p value columns (x and y)
 res_out <- dat %>%
@@ -60,7 +61,8 @@ nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = "
     geom_abline(slope = 1, intercept = 0, colour = "red") +
     #ggtitle(nom) +
     theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), legend.title = element_blank()) +
-    labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P))) #+
+    labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P))) +
+    scale_colour_hue(breaks = levels(res_out[["subset"]])) #+
     #theme(legend.position = "right") +
     #scale_colour_manual(name = element_blank(),
     ###labels need to be in alphabetical order!!
@@ -113,10 +115,11 @@ sum(lipoproteins %in% CAD_assoc$Metabolite)
 
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
+  mutate(FDR = make_pretty(p.adjust(`Pr(>|t|)`, method = "fdr"), 3)) %>%
   mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
   mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
   mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
-  dplyr::select(Metabolite, `Estimate (95% CI)`, P)
+  dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR)
 
 write.table(CAD_tab, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 

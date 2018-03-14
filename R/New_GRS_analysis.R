@@ -38,11 +38,12 @@ forest_dat <- rbind(CAD_score_lr_nr[, 1:7], metabo_GRS_lr_nr, residual_GRS_lr_nr
   mutate(score = rep(c("Total", "Metabolite", "Residual"), each = nrow(CAD_score_lr_nr))) %>%
   mutate(facet_var = facet_var)
 
-forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
-pdf(paste0("outputs/forests/", as.character(age), "/all_scores_nrmetabs_forest.pdf"), width = 15, height = 10)
-print(forest_plot(forest_dat, col_num = 4, group = "score", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)"))
-dev.off()
 
+forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
+forest_dat$score <- as.factor(forest_dat$score)
+pdf(paste0("outputs/forests/", as.character(age), "/all_scores_nrmetabs_forest.pdf"), width = 15, height = 10)
+print(forest_plot(forest_dat, col_num = 4, group = "score", y_axis = "Metabolite", units = "Beta coefficient (95% CI)", null_at = 0))
+dev.off()
 
 # QQ 
 res_out <- cbind(CAD_score_lr_nr, metabo_GRS_lr_nr$`Pr(>|t|)`, residual_GRS_lr_nr$`Pr(>|t|)`)
@@ -82,7 +83,7 @@ median(abs(metabo_GRS_lr_nr$Estimate))
 median(abs(CAD_score_lr_nr$Estimate))
 
 metabo_and_CAD <- rbind(metabo_GRS_lr_nr, CAD_score_lr_nr[, 1:7]) %>%
-  mutate(score = rep(c("metabo", "CAD"), each = 151))
+  mutate(score = rep(c("metabo", "CAD"), each = length(nr_mnames)))
 
 wt <- wilcox.test(Estimate ~ score, data = metabo_and_CAD)
 wt # P = 1.374e-13

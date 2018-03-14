@@ -76,8 +76,9 @@ forest_dat <- do.call(rbind, result) %>%
 
 # Could be changed still? 
 forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
+forest_dat$age <- factor(forest_dat$age, levels = c(7, 15, 17))
 pdf("outputs/forests/Age_diff_met_conc_no_particle_forest.pdf", width = 15, height = 10)
-forest_plot(forest_dat, col_num = 4, group = "age", y_axis_var = "Metabolite", units = "Log10(median metabolite concentration)")
+print(forest_plot(forest_dat, col_num = 4, group = "age", y_axis = "Metabolite", units = "Log10(median metabolite concentration)", null_at = 0))
 dev.off()
 
 # Particle sizes only
@@ -97,8 +98,9 @@ forest_dat <- do.call(rbind, result) %>%
 
 # Could be changed still? 
 forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
+forest_dat$age <- factor(forest_dat$age, levels = c(7, 15, 17))
 pdf("outputs/forests/Age_diff_met_conc_particle_only_forest.pdf", width = 15, height = 10)
-forest_plot(forest_dat, col_num = 2, group = "age", y_axis_var = "Metabolite", units = "Log10(median metabolite concentration)")
+print(forest_plot(forest_dat, col_num = 2, group = "age", y_axis = "Metabolite", units = "Log10(median metabolite concentration)", null_at = 0))
 dev.off()
 
 # ----------------------------------------------------------------------------
@@ -106,7 +108,7 @@ dev.off()
 # ----------------------------------------------------------------------------
 
 full_dat <- do.call(rbind, age_diff)
-full_dat$age <- c(rep(7, 149), rep(15, 149), rep(17, 149))
+full_dat$age <- c(rep(7, length(nr_mnames)), rep(15, length(nr_mnames)), rep(17, length(nr_mnames)))
 
 kw_age_test <- kruskal.test(Estimate ~ age, data = full_dat) 
 kw_age_test #p = 0.8227 therefore no evidence of difference between log10 median values of each metabolite at different age groups
@@ -120,9 +122,8 @@ if (!("CAD_score" %in% colnames(d))) {
 #Comparison of metabolite-GRS associations
 age_diff_reg <-  list()
 for (i in unique(d[["age"]])) {
-	temp_dat <- filter(d, age == i) %>%
-		dplyr::select(-insulin, -glucose)
-	age_diff_reg[[as.character(i)]] <- linearRegress('CAD_score', nr_mnames[-c(150, 151)], temp_dat)
+	temp_dat <- filter(d, age == i)
+	age_diff_reg[[as.character(i)]] <- linearRegress('CAD_score', nr_mnames, temp_dat)
 }
 result <- age_diff_reg
 
@@ -135,9 +136,9 @@ forest_dat <- do.call(rbind, result) %>%
 	mutate(facet_var = facet_var)
 
 forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
-
+forest_dat$age <- factor(forest_dat$age, levels = c(7, 15, 17))
 pdf("outputs/forests/Age_diff_GRS_met_forest.pdf", width = 15, height = 10)
-forest_plot(forest_dat, col_num = 4, group = "age", y_axis_var = "Metabolite", units = "Beta coefficient (95% CI)")
+print(forest_plot(forest_dat, col_num = 4, group = "age", y_axis = "Metabolite", units = "Beta coefficient (95% CI)", null_at = 0))
 dev.off()
 
 full_dat2 <- do.call(rbind, age_diff_reg)
