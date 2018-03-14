@@ -2,42 +2,14 @@
 # Data setup 
 # ------------------------------------------------------------------
 
-#install.packages("cluster")
-#install.packages("RColorBrewer")
-#install.packages("gplots")
-#install.packages("ape")
-#install.packages("foreign")
-#install.packages("openxlsx")
-#install.packages("GenABEL")
-#install.packages("gtools")
-#install.packages("ggplot2")
-#install.packages("tidyverse")
-#install.packages("haven")
-#install.packages("readxl")
-#install.packages("qqman")
-#install.packages("zeallot")
-#install.packages("data.table")
-#install.packages("gridExtra")
-#install.packages("FSA")
+pkgs <- c("cluster", "RColorBrewer", "gplots", "ape", "foreign", "openxlsx", "GenABEL", "gtools", "ggplot2", "tidyverse", "haven", "readxl", "qqman", "zeallot", "data.table", "gridExtra", "FSA", "stringr")
 
-library(cluster)
-library(RColorBrewer)
-library(gplots)
-library(ape)
-library(foreign)
-library(openxlsx)
-library(GenABEL)
-library(gtools)
-library(ggplot2)
-library(tidyverse)
-library(haven)
-library(readxl)
-library(qqman)
-library(stringr)
-library(zeallot)
-library(data.table)
-library(gridExtra)
-library(FSA)
+for (i in pkgs) {
+  if (!(i %in% installed.packages())) {
+    install.packages(i)
+  }
+  library(i, character.only = T)
+}
 
 source("R/Linear_regression_func.R")
 
@@ -53,7 +25,6 @@ make_pretty <- function (num, digits) {
 datafile_metabs <- read_dta("inputs/metabolite_data.dta") 
 #datafile_metabs <- datafile_metabs[, -grep(paste("glucose", "insulin", sep = "|"), colnames(datafile_metabs))]
 
-## NT: In what form will they receive the genetic data? - Could just note down what form I have it in?
 datafile_SNPs <- read_dta("inputs/genotype_data.dta") # was New_Genotype_Sorted_dosage_genotype_data
 datafile_SNPs <- datafile_SNPs %>%
   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
@@ -70,7 +41,7 @@ datafile_SNPs <- datafile_SNPs %>%
 
 SNP_info <- read_excel("inputs/SNP_info.xlsx")
 colnames(SNP_info) <- c("Locus", "Lead_variant", "A1", "A2", "A1_freq", "OR", "logOR")
-head(SNP_info)
+SNP_info
 
 # ------------------------------------------------------------------
 # Produce weighted variants with correct effect allele
