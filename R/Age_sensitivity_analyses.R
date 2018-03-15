@@ -184,14 +184,14 @@ dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = 
 
 res_out <- left_join(full_dat2, subset_df) %>%
 	filter(group != "NA")
-
+res_out$age <- factor(res_out$age, levels = c(7,15,17))
 # Would be nice if could change this so that the ages are in order...
-p <- ggplot(arrange(res_out, age), aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = as.character(sort(age)))) +
+p <- ggplot(res_out, aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = age)) +
   geom_boxplot() +
-  labs(x = "Particle size class", y = "Relative effect estimate", legend = "Age") +
+  labs(x = "Particle size class", y = "Effect estimate", legend = "Age") +
   theme(text = element_text(size = 25), axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL")) +
-  scale_fill_discrete(name = "Age")
+  scale_fill_discrete(name = "Age", breaks = levels(res_out$age)) +
 pdf("outputs/other/age_strat_lipoprotein_subclass_effect_comparison.pdf",width = 15, height = 10)
 print(p)
 dev.off()
