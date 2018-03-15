@@ -80,7 +80,7 @@ dev.off()
 pdf(paste0("outputs/other/", as.character(age), "/lipoprotein_subclass_effect_comparison.pdf"), width = 15, height = 10)
 p <- ggplot(res_out) +
   geom_boxplot(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset)) +
-  labs(x = "Particle size class", y = "Relative effect estimate") +
+  labs(x = "Particle size class", y = "Effect estimate") +
   theme(text = element_text(size = 30), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL"))
 print(p)
