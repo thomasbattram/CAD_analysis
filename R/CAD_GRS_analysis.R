@@ -123,8 +123,22 @@ CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
 
 write.table(CAD_tab, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
-
 median(abs(CAD_score_lr_nr$Estimate))
+
+# ------------------------------------------------------------------
+# Independent features
+# ------------------------------------------------------------------
+
+assoc_met <- filter(CAD_tab, FDR < 0.05) %>%
+  dplyr::select(Metabolite)
+assoc_met <- assoc_met[, 1]
+
+assoc_tab <- dplyr::select(d, one_of(assoc_met))
+
+D <-  as.dist(1 - abs(cor(assoc_tab)))
+PRhoTree <- hclust(D, method = "complete")
+k <- cutree(PRhoTree, h = 0.2) ## distances are in 1 - Pearson Rho distances
+table(k) ## 20 Clusters
 
 print("CAD-GRS analysis complete - please proceed to the Individual variant analysis")
 
