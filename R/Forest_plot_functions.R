@@ -90,7 +90,7 @@ met_num <- nrow(dat)/group_num/col_num
 	y_axis_var <- y_axis[1]
 
 	plots <- list()
-	i=1
+
 	for (i in 1:col_num) {
 		test_forest_dat <- filter(dat, facet_var == i)
 		test_shading_dat <- filter(shading, facet_var == i)
