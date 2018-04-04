@@ -22,6 +22,50 @@ if (!(exists("CAD_score_lr_nr"))) {
   CAD_score_lr_nr <- linearRegress('CAD_score', nr_mnames, d, "age")
 }
 
+# ------------------------------------------------------------------
+# Variance explained by the variants associated with 1 or more metabolites
+# ------------------------------------------------------------------
+linearRegress2 <- function(exposure.name,metabolite.name,dataset,covariate.name=NULL,  
+                        metabolite.log='F',subset=NULL) 
+{ 
+  ## exposure.name: the single exposure, e.g. 'BMI' - in this case the SNP or score 
+  ## metabolite.name: multiple metabolic outcomes, e.g. c('LDL_C','SERUM_TG') 
+  
+  tx <- dataset
+  if(!is.null(subset)) {ind = with(tx, eval(parse(text = subset))); tx = tx[ind, ]} 
+  
+  ## linear regression of exposure with metabolites      
+  add <- numeric() 
+  fom <- formula(paste('met~', paste(c(exposure.name, covariate.name),collapse = '+'))) 
+  
+  for (j in 1:length(metabolite.name))  
+  { 
+    met <- tx[[metabolite.name[j]]];    
+    fit <- lm(fom, data = tx) 
+    temp <- c(summary(fit)$coef[exposure.name, ], confint(fit)[exposure.name, ], summary(fit)$r.squared); 
+    add <- rbind(add,temp);  
+  }   
+  rownames(add) <- metabolite.name 
+  add <- data.frame(add,check.names = F) 
+  add$Metabolite <- metabolite.name
+  add 
+}
+
+metabo_GRS_lr_nr2 <- linearRegress2('metabo_GRS', nr_mnames, d, "age")
+metabo_GRS_lr_nr2 <- arrange(metabo_GRS_lr_nr2, Metabolite)
+head(metabo_GRS_lr_nr2)
+summary(metabo_GRS_lr_nr2)
+CAD_score_lr_nr2 <- linearRegress2('CAD_score', nr_mnames, d, "age")
+CAD_score_lr_nr2 <- arrange(CAD_score_lr_nr2, Metabolite)
+head(CAD_score_lr_nr2)
+summary(CAD_score_lr_nr2)
+
+
+CAD_score_lr_nr2$r2_ratio <- metabo_GRS_lr_nr2$V7/CAD_score_lr_nr2$V7
+summary(CAD_score_lr_nr2)
+
+
+
 # ----------------------------------------------------------------------------
 # Plots
 # ----------------------------------------------------------------------------
