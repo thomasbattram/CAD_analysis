@@ -7,9 +7,9 @@
 stopifnot(exists("datafile_metabs"))
 
 # Add in a unique identifier
-datafile_metabs <- datafile_metabs %>%
-	mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-	dplyr::select(u_ID, everything())
+# datafile_metabs <- datafile_metabs %>%
+# 	mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
+# 	dplyr::select(u_ID, everything())
 
 # ------------------------------------------------------------------
 # Alteration of metabolite names 
@@ -114,7 +114,6 @@ for (i in mnames) {
   df_main[[i]] <- as.numeric(df_main[[i]])
   df_main[[i]] <- rntransform(formula = df_main[[i]], data = df_main, family = gaussian)
 }
-
 
 print("Metabolite names changed and data at 3 ages merged")
 

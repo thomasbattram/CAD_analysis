@@ -2,7 +2,7 @@
 # HMGCR SNP analysis 
 # ----------------------------------------------------------------------------
 
-HMGCR_SNP_results_nr <- lapply(HMGCR_SNPs, function(x) {linearRegress(x, nr_mnames, d)})
+HMGCR_SNP_results_nr <- lapply(HMGCR_SNPs, function(x) {linearRegress(x, nr_mnames, d, "age")})
 
 names(HMGCR_SNP_results_nr) <- HMGCR_SNPs
 
@@ -26,6 +26,8 @@ extract_sig_hits <- function(data, type = "bon") {
       res <- filter(data[[i]], Bonferroni < 0.05)
     } else if (type == "fdr") {
       res <- filter(data[[i]], FDR < 0.05)
+    } else if (type == 0.05) {
+      res <- filter(data[[i]], `Pr(>|t|)` < 0.05)
     }
     if (nrow(res) > 0) {
       output[[i]] <- res
@@ -33,6 +35,11 @@ extract_sig_hits <- function(data, type = "bon") {
   }
   output
 }
+
+# ----------------------------------------------------------------------------
+# Make tables of results
+# ----------------------------------------------------------------------------
+
 
 sig_nr <- extract_sig_hits(HMGCR_SNP_results_nr)
 for (i in names(sig_nr)) {
@@ -58,17 +65,22 @@ for (i in names(sig_nr_FDR)) {
     dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR)
 }
 
-# ----------------------------------------------------------------------------
-# Make tables of results
-# ----------------------------------------------------------------------------
+sig_nr_nom <- extract_sig_hits(HMGCR_SNP_results_nr, type = 0.05)
+for (i in names(sig_nr_nom)) {
+  sig_nr_nom[[i]] <- sig_nr_nom[[i]] %>%
+    arrange(`Pr(>|t|)`) %>%
+    mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
+    mutate(FDR = make_pretty(FDR, 3)) %>%
+    mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
+    mutate(up_CI = make_pretty(`97.5 %`, 3)) %>%
+    mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
+    dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR)
+}
 
-write.table(sig_nr_FDR[["rs17238484"]], file = paste0("outputs/tables/", as.character(age), "/rs17238484_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
-write.table(sig_nr_FDR[["rs12916"]], file = paste0("outputs/tables/", as.character(age), "/rs12916_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
 
-
-
-
+write.table(sig_nr_nom[["rs17238484"]], file = paste0("outputs/tables/", as.character(age), "/rs17238484_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(sig_nr_nom[["rs12916"]], file = paste0("outputs/tables/", as.character(age), "/rs12916_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 
 
 

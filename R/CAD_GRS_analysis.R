@@ -4,6 +4,28 @@
 
 d[["CAD_score"]] <- rowSums(d[, SNPs])
 
+# For cohort characteristics
+temp <- dplyr::select(d, aln, qlet, age, CAD_score)
+write.table(temp, file = "outputs/other/cad_score.txt", col.names = T, row.names = F, quote = F, sep = "\t")
+
+# source("R/get_cohort_chars.R")
+co_chars <- read.delim("outputs/tables/cohort_chars.txt", stringsAsFactors = F)
+
+summary(d$CAD_score) 
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 1.212   1.699   1.806   1.812   1.917   2.546
+
+new_snps <- gsub("_w", "", SNPs)
+
+summary(rowSums(d[, new_snps]))
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 37.90   49.37   52.19   52.22   55.04   67.46 
+
+d <- d %>%
+  mutate(tp = age) %>%
+  dplyr::select(-age) %>%
+  left_join(co_chars)
+
 # ------------------------------------------------------------------
 # Do the linear regression analysis 
 # ------------------------------------------------------------------
@@ -26,7 +48,7 @@ p <- ggplot(res_out, aes(x = x, y = y)) +
   geom_point(colour = "blue") +
   geom_abline(slope = 1, intercept = 0, colour = "red") +
   #ggtitle(nom) +
-  theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30)) +
+  theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), axis.text = element_text(size = 20)) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)))
 pdf(paste0("outputs/other/", as.character(age), "/CAD_score_qq.pdf"), width = 15, height = 10)
 print(p)
@@ -44,7 +66,7 @@ CAD_score_lr_nr$subset <- as.factor(CAD_score_lr_nr$subset)
 # Remove metabolites not grouped (non-lipoproteins)
 dat <- CAD_score_lr_nr[-which(is.na(CAD_score_lr_nr$group)), ]
 str(dat)
-dat$subset <- factor(dat$subset, levels = c("LDL", "Remnant_particles", "Large_VLDL", "Small_HDL", "Large_HDL", "V_Large_HDL"))
+dat$subset <- factor(dat$subset, levels = c("LDL", "Atherogenic_non_LDL", "Large_VLDL", "Small_HDL", "Large_HDL", "V_Large_HDL"))
 
 # Create expected and observed p value columns (x and y)
 res_out <- dat %>%
@@ -60,7 +82,7 @@ nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = "
     geom_point(aes(shape = factor(group)), size = 3) +
     geom_abline(slope = 1, intercept = 0, colour = "red") +
     #ggtitle(nom) +
-    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), legend.title = element_blank()) +
+    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), legend.title = element_blank(), axis.text = element_text(size = 20)) +
     labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P))) +
     scale_colour_hue(breaks = levels(res_out[["subset"]])) #+
     #theme(legend.position = "right") +
@@ -81,10 +103,11 @@ pdf(paste0("outputs/other/", as.character(age), "/lipoprotein_subclass_effect_co
 p <- ggplot(res_out) +
   geom_boxplot(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset)) +
   labs(x = "Particle size class", y = "Effect estimate") +
-  theme(text = element_text(size = 30), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL"))
+  theme(text = element_text(size = 30), axis.text = element_text(size = 20), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
 print(p)
 dev.off()
+nrow(res_out) # 98 lipoproteins
 
 # Testing for normality within group estimates
 shap_test <- vector(mode = "list", length = length(unique(res_out$subset)))
@@ -111,7 +134,7 @@ CAD_assoc <- CAD_score_lr_nr %>%
 
 length(lipoproteins)  
 sum(lipoproteins %in% CAD_assoc$Metabolite)
-
+dim(CAD_assoc)
 
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%

@@ -28,7 +28,7 @@ RNTdat <- apply(dplyr::select(dat, -u_ID), 2, rntransform)
 D <-  as.dist(1 - abs(cor(RNTdat)))
 PRhoTree <- hclust(D, method = "complete")
 k <- cutree(PRhoTree, h = 0.2) ## distances are in 1 - Pearson Rho distances
-table(k) ## 43 Clusters
+table(k) ## 42 Clusters
 
 # Plot dendrogram
 pdf(paste0("outputs/other/", as.character(age), "/Clustering_DendRect.pdf"), width = 20, height = 12)

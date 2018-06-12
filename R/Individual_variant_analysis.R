@@ -2,8 +2,9 @@
 # Individual variant-metabolite analysis 
 # ------------------------------------------------------------------
 
-
-indi_SNP_results_nr <- lapply(SNPs, function(x) {linearRegress(x, nr_mnames, d)})
+indi_SNP_results_nr <- lapply(SNPs, function(x) {linearRegress(x, nr_mnames, d, "age")})
+HMGCR_SNP_results_nr <- lapply(HMGCR_SNPs, function(x) {linearRegress(x, nr_mnames, d, "age")})
+names(HMGCR_SNP_results_nr) <- HMGCR_SNPs
 
 SNP_names <- unlist(strsplit(SNPs, "_w"))
 
@@ -46,6 +47,10 @@ sig_nr_FDR <- extract_sig_hits(indi_SNP_results_nr, type = "fdr")
 names_sig_nr <- names(sig_nr)
 names_sig_nr_FDR <- names(sig_nr_FDR)
 
+siggg <- filter(SNP_info, Lead_variant %in% names_sig_nr_FDR)
+
+cat(paste(siggg$Lead_variant, siggg$gene))
+
 write.table(names_sig_nr, paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
 write.table(names_sig_nr_FDR, paste0("outputs/other/", as.character(age), "/FDR_significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
 
@@ -77,15 +82,25 @@ saveWorkbook(workbook, file = paste0("outputs/tables/", as.character(age), "/FDR
 source("R/Dendrogram_production.R")
 load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 
+# out_dat <- extract_outcome_data(SNP_info$Lead_variant, x, proxies = 1, rsq = 0.9, align_alleles = 1, palindromes = 1, maf_threshold = 0.3)
+# unique(out_dat$originalname.outcome)
+# write.table(out_dat, "mr_dat.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# met_qtls <- filter(metab_qtls, SNP %in% SNP_info$Lead_variant) %>%
+#   dplyr::select(SNP, pval, phenotype)
 
 # Produce heatmaps using differing cluster methods and effect values
 cluster_method <- c("data_driven", "biological")
 data_type <- c("Pr(>|t|)", "Estimate")
+i=2
+j=2
+gene_info <- dplyr::select(SNP_info, Lead_variant, gene)
 
+heat_dat <- c(indi_SNP_results_nr, HMGCR_SNP_results_nr)
 for (i in 1:2) {
   data <- data_type[i]
-  db <- sapply(indi_SNP_results_nr, function(x) {out = x[, data]; return(out)})
-  rownames(db) <- rownames(indi_SNP_results_nr[[1]])
+  db <- sapply(heat_dat, function(x) {out = x[, data]; return(out)})
+  rownames(db) <- rownames(heat_dat[[1]])
   db <- as.data.frame(db) %>%
     mutate(Metabolite = rownames(.)) %>%
     left_join(subset_df) %>%
@@ -93,7 +108,8 @@ for (i in 1:2) {
 
   rownames(db) <- db[["Metabolite"]]
 
-  db <- select(db, -one_of(colnames(subset_df)))
+  db <- dplyr::select(db, -one_of(colnames(subset_df)))
+
 
   # Extract variables required for heatmap function
   if (data == "Estimate") {
@@ -124,9 +140,33 @@ for (i in 1:2) {
     }
     fin_dat <- as.matrix(fin_dat)
 
+    write.table(fin_dat, file = paste0("outputs/heatmaps/", as.character(age), "_", cluster, "_", data, "dat.txt"), row.names = T, col.names = T, quote = F, sep = "\t")
+
+    heat1 <- fin_dat[, !(colnames(fin_dat) %in% HMGCR_SNPs)]
+
     pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
-    heatmap.2( t(fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:62 , cexRow = 0.8, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC)
+    heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+    print(heatmap)
     dev.off()
+    new_fin_dat <- fin_dat[, c(names_sig_nr_FDR, HMGCR_SNPs)]
+
+    gene_info <- SNP_info %>%
+      dplyr::select(Lead_variant, gene) %>%
+      filter(Lead_variant %in% colnames(new_fin_dat))
+
+    index <- match(colnames(new_fin_dat), gene_info$Lead_variant)
+    gene_info <- gene_info[index, ]
+
+    gene_info[gene_info$gene == "BUD13_ZNF259_APOA5", "gene"] <- "APOA5"
+    gene_info[gene_info$gene == "TOMM40_APOE_APOC1", "gene"] <- "APOE_APOC1"
+
+    colnames(new_fin_dat) <- paste0(colnames(new_fin_dat), "\n", gene_info$gene)
+
+
+    pdf(paste0("outputs/heatmaps/", as.character(age), "/sig_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
+    heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+    dev.off()
+
   }
 }
 

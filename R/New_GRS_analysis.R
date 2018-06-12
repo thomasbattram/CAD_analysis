@@ -108,7 +108,7 @@ p <- ggplot(res_out, aes(x = x, y = y.CAD)) +
   geom_abline(slope = 1, intercept = 0, colour = "red") +
   scale_colour_discrete(breaks = c("Metabolite GRS (7 variants)", "Total GRS (56 variants)", "Residual GRS (49 variants)")) +
   #ggtitle(nom) +
-  theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), axis.text = element_text(size = 20)) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)), colour = "Genetic risk score")
 pdf(paste0("outputs/other/", as.character(age), "/3_scores_vs_metabs_qq.pdf"), width = 20, height = 10)
 print(p)

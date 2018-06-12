@@ -29,11 +29,11 @@ age_diff <- list()
 age_diff_not_log <- list()
 for (i in unique(met_dat[["age"]])) {
 	temp_dat <- filter(met_dat, age == i)
-	medians <- sapply(select(temp_dat, one_of(nr_mnames)), function(x) {median(x)})
+	medians <- sapply(dplyr::select(temp_dat, one_of(nr_mnames)), function(x) {median(x)})
 	log_med <- log10(medians)
-	low_quart <- sapply(select(temp_dat, one_of(nr_mnames)), function(x) {as.numeric(quantile(x, na.rm = TRUE)[2])})
+	low_quart <- sapply(dplyr::select(temp_dat, one_of(nr_mnames)), function(x) {as.numeric(quantile(x, na.rm = TRUE)[2])})
 	log_low_quart <- log10(low_quart)
-	up_quart <- sapply(select(temp_dat, one_of(nr_mnames)), function(x) {as.numeric(quantile(x, na.rm = TRUE)[4])})
+	up_quart <- sapply(dplyr::select(temp_dat, one_of(nr_mnames)), function(x) {as.numeric(quantile(x, na.rm = TRUE)[4])})
 	log_up_quart <- log10(up_quart)
 
 	temp_out_log <- data.frame(log_med, log_low_quart, log_up_quart) %>%
@@ -121,8 +121,8 @@ if (!("CAD_score" %in% colnames(d))) {
 
 #Comparison of metabolite-GRS associations
 age_diff_reg <-  list()
-for (i in unique(d[["age"]])) {
-	temp_dat <- filter(d, age == i)
+for (i in unique(d[["tp"]])) {
+	temp_dat <- filter(d, tp == i)
 	age_diff_reg[[as.character(i)]] <- linearRegress('CAD_score', nr_mnames, temp_dat)
 }
 result <- age_diff_reg
@@ -145,7 +145,7 @@ full_dat2 <- do.call(rbind, age_diff_reg)
 full_dat2$age <- c(rep(17, 149), rep(15, 149), rep(7, 149))
 
 kw_age_test2 <- kruskal.test(Estimate ~ age, data = full_dat2) 
-kw_age_test2 #p = 0.007643 therefore evidence of difference between age groups 
+print(kw_age_test2) #p = 0.02417 therefore evidence of difference between age groups 
 dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = "bh")
 
 # ----------------------------------------------------------------------------
@@ -189,9 +189,9 @@ res_out$age <- factor(res_out$age, levels = c(7,15,17))
 p <- ggplot(res_out, aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = age)) +
   geom_boxplot() +
   labs(x = "Particle size class", y = "Effect estimate", legend = "Age") +
-  theme(text = element_text(size = 25), axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Remnant_particles" = "Remnant particles", "LDL" = "LDL")) +
-  scale_fill_discrete(name = "Age", breaks = levels(res_out$age)) +
+  theme(text = element_text(size = 25), axis.title.x = element_blank(), axis.line = element_line(colour = "black"), axis.text = element_text(size = 20)) +
+  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL particles", "LDL" = "LDL")) +
+  scale_fill_discrete(name = "Age", breaks = levels(res_out$age))
 pdf("outputs/other/age_strat_lipoprotein_subclass_effect_comparison.pdf",width = 15, height = 10)
 print(p)
 dev.off()
@@ -226,10 +226,9 @@ dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = 
 # # - Could look at just SNPs that are "significantly" associated with mets in our study
 # # - Could potentially meta-analyse the results for these SNPs...
 # # Need to remove normalisation of metabolites - check Kettunen methods - i.e. did he log metabs etc. 
+# devtools::install_github("MRCIEU/TwoSampleMR")
+# devtools::install_github("MRCIEU/MRInstruments")
 
-# library(MRInstruments)
-# data(metab_qtls)
-# head(metab_qtls)
 
 # # Making a new metabolite dataset with log-transformed metabs
 # met_dat <- df_main_not_transformed %>%

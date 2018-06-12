@@ -22,23 +22,37 @@ make_pretty <- function (num, digits) {
 # Read in all the data 
 # ------------------------------------------------------------------
 
-datafile_metabs <- read_dta("inputs/metabolite_data.dta") 
-#datafile_metabs <- datafile_metabs[, -grep(paste("glucose", "insulin", sep = "|"), colnames(datafile_metabs))]
+datafile_metabs <- read_dta("inputs/metabolite_data.dta")  %>%
+  mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
+  dplyr::select(u_ID, everything())
+datafile_metabs <- datafile_metabs[, -grep(paste("glucose", "insulin", sep = "|"), colnames(datafile_metabs))]
 
+# datafile_metabs <- read_dta("/Volumes/ALSPAC-Data/Current/Other/Samples/Child/child_metabolomics_1b.dta") %>%
+#   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
+#   select(u_ID, everything())
 datafile_SNPs <- read_dta("inputs/genotype_data.dta") # was New_Genotype_Sorted_dosage_genotype_data
 datafile_SNPs <- datafile_SNPs %>%
   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-  select(u_ID, everything())
+  dplyr::select(u_ID, everything())
+
+# datafile_SNPs <- read.table("inputs/cadsites_new", header = T) %>%
+#   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
+#   select(u_ID, everything())
+
+head(datafile_SNPs)
 
 SNP_info <- read_excel("inputs/SNP_info.xlsx")
 colnames(SNP_info) <- c("Locus", "Lead_variant", "A1", "A2", "A1_freq", "OR", "logOR")
 SNP_info
+
+# SNP_info <- read_csv("new_CAD_gwas_SNPs.csv")
 
 # ------------------------------------------------------------------
 # Produce weighted variants with correct effect allele
 # ------------------------------------------------------------------
 
 genotype_alleles <- read.table("inputs/alleles.txt", header = F, stringsAsFactors = F)
+# genotype_alleles <- read.table("inputs/alleles_new.txt", header = F, stringsAsFactors = F)
 colnames(genotype_alleles) <- c("CHR", "SNP", "POS", "other_allele", "ref_allele")
 
 # Change indels to insertion/deletion rather than actual bases
@@ -56,6 +70,7 @@ HMGCR_SNPs <- c("rs17238484", "rs12916")
 
 SNP_info <- arrange(SNP_info, Lead_variant)
 genotype_alleles <- arrange(genotype_alleles, SNP)
+SNP_info <- filter(SNP_info, Lead_variant %in% genotype_alleles$SNP)
 stopifnot(SNP_info$Lead_variant == genotype_alleles$SNP)
 
 # Extract SNPs where the effect allele does not equal the reference allele
@@ -83,9 +98,9 @@ for (i in variants) {
   new_col_name <- paste(i, "_w", sep = "")
   datafile_SNPs_W[[new_col_name]] <- datafile_SNPs_W[[i]] * weight[["logOR"]]
 }
-datafile_SNPs_W <- datafile_SNPs_W %>%
-  mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-  dplyr::select(u_ID, everything())
+# datafile_SNPs_W <- datafile_SNPs_W %>%
+#   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
+#   dplyr::select(u_ID, everything())
 
 # ------------------------------------------------------------------
 # Merge the ages and and extract useful info
@@ -93,9 +108,13 @@ datafile_SNPs_W <- datafile_SNPs_W %>%
 source("R/Merge.R")
 # merge 
 d <- left_join(df_main, datafile_SNPs_W) %>%
-  dplyr::select(u_ID, cidB9999, qlet, age, everything())
-d
+  dplyr::select(u_ID, cidB9999, qlet, age, everything()) %>%
+  .[complete.cases(.), ]
+# d <- left_join(df_main, datafile_SNPs_W) %>%
+  # dplyr::select(u_ID, aln, qlet, age, everything())
 
+d
+nrow(d) # 5905 people
 # Extract SNP names - as well as lipid SNPs 
 SNPs <-  colnames(d)[str_detect(colnames(d), "[\\d]_w$")] 
 
@@ -114,7 +133,7 @@ non_lipo <- nr_mnames[!(nr_mnames %in% lipoproteins)]
 
 # Re-order the data by unique identifiers
 d <- arrange(d, cidB9999, qlet)
-
+# d <- arrange(d, aln, qlet)
 length(mnames) - length(nr_mnames) #81
 
 # For age specific analyses
