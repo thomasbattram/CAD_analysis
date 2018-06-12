@@ -16,32 +16,15 @@ make_pretty <- function (num, digits) {
 # Read in all the data 
 # ------------------------------------------------------------------
 
-# datafile_metabs <- read_dta("inputs/metabolite_data.dta")  %>%
-#   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-#   dplyr::select(u_ID, everything())
-# datafile_metabs <- datafile_metabs[, -grep(paste("glucose", "insulin", sep = "|"), colnames(datafile_metabs))]
-
 datafile_metabs <- read_dta("/Volumes/ALSPAC-Data/Current/Other/Samples/Child/child_metabolomics_1b.dta") %>%
   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
   dplyr::select(u_ID, everything())
-
-
-# datafile_SNPs <- read_dta("inputs/genotype_data.dta") # was New_Genotype_Sorted_dosage_genotype_data
-# datafile_SNPs <- old_datafile_SNPs %>%
-#   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-#   dplyr::select(u_ID, everything())
 
 datafile_SNPs <- read.table("inputs/cadsites_new", header = T) %>%
   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
   dplyr::select(u_ID, everything())
 
-
-
 head(datafile_SNPs)
-
-# SNP_info <- read_excel("inputs/SNP_info.xlsx")
-# colnames(SNP_info) <- c("Locus", "Lead_variant", "A1", "A2", "A1_freq", "OR", "logOR")
-# SNP_info
 
 SNP_info <- read_csv("new_CAD_gwas_SNPs.csv")
 SNP_info
@@ -49,7 +32,6 @@ SNP_info
 # Produce weighted variants with correct effect allele
 # ------------------------------------------------------------------
 
-# genotype_alleles <- read.table("inputs/alleles.txt", header = F, stringsAsFactors = F)
 genotype_alleles <- read.table("inputs/alleles_new.txt", header = F, stringsAsFactors = F)
 colnames(genotype_alleles) <- c("CHR", "SNP", "POS", "other_allele", "ref_allele")
 
@@ -66,6 +48,7 @@ for (i in 1:nrow(genotype_alleles)) {
 
 HMGCR_SNPs <- c("rs17238484", "rs12916")
 
+# Remove SNPs from SNP_info that weren't within the ALSPAC genotype data
 SNP_info <- arrange(SNP_info, Lead_variant)
 genotype_alleles <- arrange(genotype_alleles, SNP)
 SNP_info[!(SNP_info$Lead_variant %in% genotype_alleles$SNP), "Lead_variant"]
@@ -84,7 +67,6 @@ rev_SNPs <- genotype_alleles %>%
 datafile_SNPs_W <- datafile_SNPs
 
 # Change the coding of effect alleles where needed and weight the SNPs
-# other_headers <- c("u_ID", "cidB9999", "qlet", HMGCR_SNPs)
 variants <- SNP_info$Lead_variant
 for (i in variants) {
   # Changes allele codings
@@ -98,18 +80,12 @@ for (i in variants) {
     datafile_SNPs_W[[new_col_name]] <- datafile_SNPs_W[[i]] * weight[["logOR"]]
   }
 }
-# datafile_SNPs_W <- datafile_SNPs_W %>%
-#   mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-#   dplyr::select(u_ID, everything())
 
 # ------------------------------------------------------------------
 # Merge the ages and and extract useful info
 # ------------------------------------------------------------------
 source("R/Merge.R")
 # merge 
-# d <- left_join(df_main, datafile_SNPs_W) %>%
-#   dplyr::select(u_ID, cidB9999, qlet, age, everything()) %>%
-#   .[complete.cases(.), ]
 d <- left_join(df_main, datafile_SNPs_W) %>%
   dplyr::select(u_ID, aln, qlet, age, everything()) %>%
   .[complete.cases(.), ]
@@ -121,37 +97,16 @@ nrow(d) # 5905 people
 # temp <- dplyr::select(d, u_ID, aln, qlet, age)
 # write.table(temp, file = "cad_individual_ids.txt", col.names = T, row.names = F, quote = F, sep = "\t")
 
-# Extract SNP names - as well as lipid SNPs 
+# Extract SNP names  
 SNPs <-  colnames(d)[str_detect(colnames(d), "[\\d]_w$")] 
 
-# Removing the SNPs that didn't meet genome-wide significance in Nikpay et al. paper
-#SNP_to_rm <- c("rs273909", "rs6903956", "rs17609940", "rs10953541", "rs264", "rs2954029", "rs964184", "rs9319428", "rs17514846", "rs216172", "rs12936587", "rs46522")
-#SNP_to_rm <- paste0(SNP_to_rm, "_w")
-
-#SNPs <- SNPs[!(SNPs %in% SNP_to_rm)]
-
-#d <- d[, !(colnames(d) %in% SNP_to_rm)]
-
-
-
+# Extract lipoproteins
 lipoproteins <- c(nr_mnames[grep("-V?[HIL]DL", nr_mnames)], nr_mnames[grep("IDL", nr_mnames)])
 non_lipo <- nr_mnames[!(nr_mnames %in% lipoproteins)]
 
 # Re-order the data by unique identifiers
-# d <- arrange(d, cidB9999, qlet)
 d <- arrange(d, aln, qlet)
 length(mnames) - length(nr_mnames) #81
-
-# For age specific analyses
-if (age != "all") {
-  d <- d[d[["age"]] == age, ]
-  print(paste("The following analyses will be conducted at age", age, "only"))
-}
-
-if (age == 17) {
-  d <- dplyr::select(d, -insulin, -glucose)
-  nr_mnames <- nr_mnames[!(nr_mnames %in% c("insulin", "glucose"))]
-}
 
 # ------------------------------------------------------------------
 # Generate biological subsets
