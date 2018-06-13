@@ -47,10 +47,6 @@ sig_nr_FDR <- extract_sig_hits(indi_SNP_results_nr, type = "fdr")
 names_sig_nr <- names(sig_nr)
 names_sig_nr_FDR <- names(sig_nr_FDR)
 
-siggg <- filter(SNP_info, Lead_variant %in% names_sig_nr_FDR)
-
-cat(paste(siggg$Lead_variant, siggg$gene))
-
 write.table(names_sig_nr, paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
 write.table(names_sig_nr_FDR, paste0("outputs/other/", as.character(age), "/FDR_significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
 
@@ -82,23 +78,14 @@ saveWorkbook(workbook, file = paste0("outputs/tables/", as.character(age), "/FDR
 source("R/Dendrogram_production.R")
 load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 
-# out_dat <- extract_outcome_data(SNP_info$Lead_variant, x, proxies = 1, rsq = 0.9, align_alleles = 1, palindromes = 1, maf_threshold = 0.3)
-# unique(out_dat$originalname.outcome)
-# write.table(out_dat, "mr_dat.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-
-# met_qtls <- filter(metab_qtls, SNP %in% SNP_info$Lead_variant) %>%
-#   dplyr::select(SNP, pval, phenotype)
-
 # Produce heatmaps using differing cluster methods and effect values
 cluster_method <- c("data_driven", "biological")
 data_type <- c("Pr(>|t|)", "Estimate")
-i=2
-j=2
-gene_info <- dplyr::select(SNP_info, Lead_variant, gene)
 
 heat_dat <- c(indi_SNP_results_nr, HMGCR_SNP_results_nr)
 for (i in 1:2) {
   data <- data_type[i]
+  # Extract the data needed and arrange the metabolites
   db <- sapply(heat_dat, function(x) {out = x[, data]; return(out)})
   rownames(db) <- rownames(heat_dat[[1]])
   db <- as.data.frame(db) %>%
@@ -142,12 +129,15 @@ for (i in 1:2) {
 
     write.table(fin_dat, file = paste0("outputs/heatmaps/", as.character(age), "_", cluster, "_", data, "dat.txt"), row.names = T, col.names = T, quote = F, sep = "\t")
 
+    # Remove HMGCR SNPs from the original heatmap
     heat1 <- fin_dat[, !(colnames(fin_dat) %in% HMGCR_SNPs)]
 
     pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
     heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
     print(heatmap)
     dev.off()
+    
+    # Make a heatmap with just the SNPs associated with metabolites and the HMGCR SNPs
     new_fin_dat <- fin_dat[, c(names_sig_nr_FDR, HMGCR_SNPs)]
 
     gene_info <- SNP_info %>%

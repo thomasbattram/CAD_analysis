@@ -6,11 +6,6 @@
 
 stopifnot(exists("datafile_metabs"))
 
-# Add in a unique identifier
-# datafile_metabs <- datafile_metabs %>%
-# 	mutate(u_ID = paste(cidB9999, qlet, sep = "_")) %>%
-# 	dplyr::select(u_ID, everything())
-
 # ------------------------------------------------------------------
 # Alteration of metabolite names 
 # ------------------------------------------------------------------
@@ -75,11 +70,6 @@ df_main <- df_list[[1]] %>%
 # Add in age
 df_main[["age"]] <- 7
 
-# df_tf3_gluc <- df_list[[2]] %>%
-#   select(u_ID, glucose, insulin)
-
-# df_main <- left_join(df_main, df_tf3_gluc)
-
 df_tf3 <- df_list[[2]] %>%
   .[complete.cases(.), ] %>%
   .[!(.[[1]] %in% df_main[[1]]), ]
@@ -93,8 +83,6 @@ df_tf4 <- df_list[[3]] %>%
   .[!(.[[1]] %in% df_main[[1]]), ]
 
 # Add in glucose and insulin to age 17 as missing - was only measured at age 15
-# df_tf4[["glucose"]] <- NA
-# df_tf4[["insulin"]] <- NA
 df_tf4[["age"]] <- 17
 df_main <- rbind(df_main, df_tf4)
 # Test to see if an individual is represented more than once in the dataset

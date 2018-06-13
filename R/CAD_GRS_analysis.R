@@ -50,9 +50,7 @@ p <- ggplot(res_out, aes(x = x, y = y)) +
   #ggtitle(nom) +
   theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), axis.text = element_text(size = 20)) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)))
-pdf(paste0("outputs/other/", as.character(age), "/CAD_score_qq.pdf"), width = 15, height = 10)
-print(p)
-dev.off()
+ggsave(paste0("outputs/other/", as.character(age), "/CAD_score_qq.pdf"), plot = p, width = 15, height = 10, units = "in")
 
 # ------------------------------------------------------------------
 # CAD-GRS vs. grouped lipoproteins qq 
@@ -63,7 +61,7 @@ CAD_score_lr_nr <- left_join(CAD_score_lr_nr, subset_df)
 CAD_score_lr_nr$group <- as.factor(CAD_score_lr_nr$group)
 CAD_score_lr_nr$subset <- as.factor(CAD_score_lr_nr$subset)
 
-# Remove metabolites not grouped (non-lipoproteins)
+# Remove metabolites not grouped (non-lipoproteins and composite values)
 dat <- CAD_score_lr_nr[-which(is.na(CAD_score_lr_nr$group)), ]
 str(dat)
 dat$subset <- factor(dat$subset, levels = c("LDL", "Atherogenic_non_LDL", "Large_VLDL", "Small_HDL", "Large_HDL", "V_Large_HDL"))
@@ -85,28 +83,20 @@ nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = "
     theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), legend.title = element_blank(), axis.text = element_text(size = 20)) +
     labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P))) +
     scale_colour_hue(breaks = levels(res_out[["subset"]])) #+
-    #theme(legend.position = "right") +
-    #scale_colour_manual(name = element_blank(),
-    ###labels need to be in alphabetical order!!
-    #labels = c("l-HDL", "l-VLDL", "LDL", "Rem P", "s-HDL", "vl-HDL"),
-    #values = colours))
 
-pdf(paste0("outputs/other/", as.character(age), "/CAD_score_vs_lipoprotein_subclasses_QQ.pdf"), width = 15, height = 10)
-print(p)
-dev.off()
+ggsave(paste0("outputs/other/", as.character(age), "/CAD_score_vs_lipoprotein_subclasses_QQ.pdf"), plot = p, width = 15, height = 10, units = "in")
 
 # ------------------------------------------------------------------
 # Differences between subsets 
 # ------------------------------------------------------------------
 # Boxplot looking at effect size differences between groups
-pdf(paste0("outputs/other/", as.character(age), "/lipoprotein_subclass_effect_comparison.pdf"), width = 15, height = 10)
 p <- ggplot(res_out) +
   geom_boxplot(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset)) +
   labs(x = "Particle size class", y = "Effect estimate") +
   theme(text = element_text(size = 30), axis.text = element_text(size = 20), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
-print(p)
-dev.off()
+
+ggsave(paste0("outputs/other/", as.character(age), "/lipoprotein_subclass_effect_comparison.pdf"), plot = p, width = 15, height = 10, units = "in")
 nrow(res_out) # 98 lipoproteins
 
 # Testing for normality within group estimates
@@ -132,10 +122,6 @@ CAD_assoc <- CAD_score_lr_nr %>%
   mutate(FDR = p.adjust(`Pr(>|t|)`, method = "fdr")) %>%
   filter(FDR < 0.05)
 
-length(lipoproteins)  
-sum(lipoproteins %in% CAD_assoc$Metabolite)
-dim(CAD_assoc)
-
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
   mutate(FDR = make_pretty(p.adjust(`Pr(>|t|)`, method = "fdr"), 3)) %>%
@@ -145,8 +131,6 @@ CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR)
 
 write.table(CAD_tab, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
-
-median(abs(CAD_score_lr_nr$Estimate))
 
 # ------------------------------------------------------------------
 # Independent features
