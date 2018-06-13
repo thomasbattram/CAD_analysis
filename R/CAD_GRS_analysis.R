@@ -50,7 +50,7 @@ p <- ggplot(res_out, aes(x = x, y = y)) +
   #ggtitle(nom) +
   theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), axis.text = element_text(size = 20)) +
   labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)))
-ggsave(paste0("outputs/other/", as.character(age), "/CAD_score_qq.pdf"), plot = p, width = 15, height = 10, units = "in")
+ggsave("outputs/other/CAD_score_qq.pdf", plot = p, width = 15, height = 10, units = "in")
 
 # ------------------------------------------------------------------
 # CAD-GRS vs. grouped lipoproteins qq 
@@ -84,7 +84,7 @@ nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = "
     labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P))) +
     scale_colour_hue(breaks = levels(res_out[["subset"]])) #+
 
-ggsave(paste0("outputs/other/", as.character(age), "/CAD_score_vs_lipoprotein_subclasses_QQ.pdf"), plot = p, width = 15, height = 10, units = "in")
+ggsave("outputs/other/CAD_score_vs_lipoprotein_subclasses_QQ.pdf", plot = p, width = 15, height = 10, units = "in")
 
 # ------------------------------------------------------------------
 # Differences between subsets 
@@ -96,7 +96,7 @@ p <- ggplot(res_out) +
   theme(text = element_text(size = 30), axis.text = element_text(size = 20), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
 
-ggsave(paste0("outputs/other/", as.character(age), "/lipoprotein_subclass_effect_comparison.pdf"), plot = p, width = 15, height = 10, units = "in")
+ggsave("outputs/other/lipoprotein_subclass_effect_comparison.pdf", plot = p, width = 15, height = 10, units = "in")
 nrow(res_out) # 98 lipoproteins
 
 # Testing for normality within group estimates
@@ -112,7 +112,7 @@ shap_test
 kw_test <- kruskal.test(Estimate ~ subset, data = res_out) 
 dunn_test <- dunnTest(Estimate ~ subset, data = res_out, method = "bh")
 dunn_res <- dunn_test[[2]]
-write.table(dunn_res, paste0("outputs/tables/", as.character(age), "/lipoprotein_subclass_kw_test.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(dunn_res, "outputs/tables/lipoprotein_subclass_kw_test.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 
 # ------------------------------------------------------------------
 # Association tables 
@@ -130,7 +130,7 @@ CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(`Estimate (95% CI)` = paste0(make_pretty(Estimate, 3), " (", low_CI, ", ", up_CI, ")")) %>%
   dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR)
 
-write.table(CAD_tab, file = paste0("outputs/tables/", as.character(age), "/CAD_GRS_metabolite_full_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(CAD_tab, file = "outputs/tables/CAD_GRS_metabolite_full_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 
 # ------------------------------------------------------------------
 # Independent features

@@ -47,8 +47,8 @@ sig_nr_FDR <- extract_sig_hits(indi_SNP_results_nr, type = "fdr")
 names_sig_nr <- names(sig_nr)
 names_sig_nr_FDR <- names(sig_nr_FDR)
 
-write.table(names_sig_nr, paste0("outputs/other/", as.character(age), "/significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
-write.table(names_sig_nr_FDR, paste0("outputs/other/", as.character(age), "/FDR_significant_SNPs.txt"), quote = F, col.names = F, row.names = F, sep = "\t")
+write.table(names_sig_nr, "outputs/other/significant_SNPs.txt", quote = F, col.names = F, row.names = F, sep = "\t")
+write.table(names_sig_nr_FDR, "outputs/other/FDR_significant_SNPs.txt", quote = F, col.names = F, row.names = F, sep = "\t")
 
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
@@ -70,7 +70,7 @@ for (i in names_sig_nr_FDR) {
   addWorksheet(wb = workbook, sheetName = i, gridLines = TRUE)
   writeDataTable(wb = workbook, sheet = i, x = temp_dat)
 }
-saveWorkbook(workbook, file = paste0("outputs/tables/", as.character(age), "/FDR_significant_SNP-metab_associations.xlsx"), overwrite = TRUE)
+saveWorkbook(workbook, file = "outputs/tables/FDR_significant_SNP-metab_associations.xlsx", overwrite = TRUE)
 
 # ------------------------------------------------------------------
 # Heatmaps
@@ -127,12 +127,12 @@ for (i in 1:2) {
     }
     fin_dat <- as.matrix(fin_dat)
 
-    write.table(fin_dat, file = paste0("outputs/heatmaps/", as.character(age), "_", cluster, "_", data, "dat.txt"), row.names = T, col.names = T, quote = F, sep = "\t")
+    write.table(fin_dat, file = paste0("outputs/heatmaps/", cluster, "_", data, "dat.txt"), row.names = T, col.names = T, quote = F, sep = "\t")
 
     # Remove HMGCR SNPs from the original heatmap
     heat1 <- fin_dat[, !(colnames(fin_dat) %in% HMGCR_SNPs)]
 
-    pdf(paste0("outputs/heatmaps/", as.character(age), "/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
+    pdf(paste0("outputs/heatmaps/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
     heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
     print(heatmap)
     dev.off()
@@ -153,7 +153,7 @@ for (i in 1:2) {
     colnames(new_fin_dat) <- paste0(colnames(new_fin_dat), "\n", gene_info$gene)
 
 
-    pdf(paste0("outputs/heatmaps/", as.character(age), "/sig_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
+    pdf(paste0("outputs/heatmaps/sig_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
     heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
     dev.off()
 

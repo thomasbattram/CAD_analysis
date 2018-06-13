@@ -79,8 +79,8 @@ for (i in names(sig_nr_nom)) {
 
 
 
-write.table(sig_nr_nom[["rs17238484"]], file = paste0("outputs/tables/", as.character(age), "/rs17238484_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
-write.table(sig_nr_nom[["rs12916"]], file = paste0("outputs/tables/", as.character(age), "/rs12916_sig_assoc.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(sig_nr_nom[["rs17238484"]], file = "outputs/tables/rs17238484_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(sig_nr_nom[["rs12916"]], file = "outputs/tables/rs12916_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 
 
 

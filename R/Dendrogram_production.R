@@ -31,7 +31,7 @@ k <- cutree(PRhoTree, h = 0.2) ## distances are in 1 - Pearson Rho distances
 table(k) ## 42 Clusters
 
 # Plot dendrogram
-pdf(paste0("outputs/other/", as.character(age), "/Clustering_DendRect.pdf"), width = 20, height = 12)
+pdf(paste0("outputs/other/Clustering_DendRect.pdf"), width = 20, height = 12)
 par(mfrow = c(1,1))
 plot(PRhoTree, hang = -1, cex = 0.5, main = "1 - Pearson Rho Cluster Dendrogram", col = "royalblue", lwd = 2)
 rect.hclust(PRhoTree , h = 0.20, border = "red")
