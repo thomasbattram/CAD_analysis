@@ -2,7 +2,11 @@
 # Data setup 
 # ------------------------------------------------------------------
 
-pkgs <- c("cluster", "RColorBrewer", "gplots", "ape", "foreign", "openxlsx", "GenABEL", "gtools", "ggplot2", "tidyverse", "haven", "readxl", "qqman", "zeallot", "data.table", "gridExtra", "FSA", "stringr", "cowplot")
+pkgs <- c("cluster", "RColorBrewer", "gplots", "ape",
+          "foreign", "openxlsx", "GenABEL", "gtools",
+          "ggplot2", "tidyverse", "haven", "readxl", 
+          "qqman", "zeallot", "data.table", "gridExtra",
+          "FSA", "stringr", "cowplot", "ggdendro")
 lapply(pkgs, require, character.only = T)
 
 source("R/Linear_regression_func.R")
