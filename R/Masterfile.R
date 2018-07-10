@@ -23,7 +23,7 @@ source("R/Individual_variant_analysis.R")
 # Analysis of association between SNPs within HMGCR (proxies for statin use) and metabolites
 source("R/HMGCR_SNP_analysis.R")
 
-# Age sensitivity analysis - STILL WORKING ON IT! 
+# Age sensitivity analysis
 source("R/Age_sensitivity_analyses.R")
 
 
