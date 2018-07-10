@@ -37,6 +37,20 @@ plot(PRhoTree, hang = -1, cex = 0.5, main = "1 - Pearson Rho Cluster Dendrogram"
 rect.hclust(PRhoTree , h = 0.20, border = "red")
 dev.off()
 
+# NEW CODE USING GGPLOT!!!!
+hcdata <- dendro_data(PRhoTree, type = "rectangle")
+str(hcdata)
+hc_labs <- label(hcdata) %>%
+	mutate(assoc = ifelse(label %in% assoc_met, "associated \n", "not \nassociated"))
+p <- ggplot() + 
+  geom_segment(data=segment(hcdata), aes(x=x, y=y, xend=xend, yend=yend)) +
+  geom_text(data=hc_labs, aes(x=x, y=y, label=label, hjust=1, colour = assoc), angle = 90, size=2) + 
+  geom_hline(yintercept = 0.2, colour = "red") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(),
+  		axis.title.x = element_blank(), legend.title = element_blank())
+
+ggsave("outputs/other/new_dendrogram.pdf", width = 20, height = 12)
+
 # ------------------------------------------------------------------
 # Produce dendrogram and colour variables for heatmaps
 # ------------------------------------------------------------------
