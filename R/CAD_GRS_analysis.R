@@ -91,7 +91,10 @@ ggsave("outputs/other/CAD_score_vs_lipoprotein_subclasses_QQ.pdf", plot = p, wid
 # ------------------------------------------------------------------
 # Boxplot looking at effect size differences between groups
 p <- ggplot(res_out) +
-  geom_boxplot(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset)) +
+  geom_violin(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset), 
+              draw_quantiles = c(0.5)) +
+  geom_jitter(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate)), height = 0,
+              width = 0.1) +
   labs(x = "Particle size class", y = "Effect estimate") +
   theme(text = element_text(size = 30), axis.text = element_text(size = 20), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
   scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
