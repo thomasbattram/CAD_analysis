@@ -81,7 +81,8 @@ load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 # Produce heatmaps using differing cluster methods and effect values
 cluster_method <- c("data_driven", "biological")
 data_type <- c("Pr(>|t|)", "Estimate")
-
+i=1
+j=2
 heat_dat <- c(indi_SNP_results_nr, HMGCR_SNP_results_nr)
 for (i in 1:2) {
   data <- data_type[i]
@@ -125,6 +126,9 @@ for (i in 1:2) {
       ColSC <- ColCol2
       fin_dat <- db
     }
+
+    ColSC <- ColCol3
+
     fin_dat <- as.matrix(fin_dat)
 
     write.table(fin_dat, file = paste0("outputs/heatmaps/", cluster, "_", data, "dat.txt"), row.names = T, col.names = T, quote = F, sep = "\t")
@@ -133,10 +137,10 @@ for (i in 1:2) {
     heat1 <- fin_dat[, !(colnames(fin_dat) %in% HMGCR_SNPs)]
 
     pdf(paste0("outputs/heatmaps/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
-    heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+    heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = "both", Colv =  Pden, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
     print(heatmap)
     dev.off()
-    
+    ####### The colours aren't correct - need to find a way to change the ordering step!!!!
     # Make a heatmap with just the SNPs associated with metabolites and the HMGCR SNPs
     new_fin_dat <- fin_dat[, c(names_sig_nr_FDR, HMGCR_SNPs)]
 

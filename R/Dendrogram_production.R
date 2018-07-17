@@ -110,5 +110,22 @@ names(K2) <- ordered_df[["subset"]]
 
 ColCol2 <- CC2[names(K2)]
 
+# ------------------------------------------------------------------
+# Produce a new colour variable 
+# ------------------------------------------------------------------
 
+# colours = biological groups
+# order = alphabetical metabolites
+
+ordered_df2 <- arrange(subset_df, Metabolite)
+K3 <- ordered_df2[["Metabolite"]]
+names(K3) <- ordered_df2[["subset"]]
+
+ColCol3 <- CC2[names(K3)]
+col2rgb(CC2)
+hist(1:1500, col=CC2, breaks = 15)
+
+## add clusters to subset_df
+subset_df <- subset_df %>%
+	left_join(clusters)
 
