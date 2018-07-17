@@ -160,7 +160,7 @@ for (i in names(groups)) {
   subset_df[subset_df[["Metabolite"]] %in% groups[[i]], "group"] <- i
 }
 
-source("R/Dendrogram_production.R")
+source("R/cluster_metabolites.R")
 
 write.table(subset_df, file = "outputs/tables/subset_table.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 

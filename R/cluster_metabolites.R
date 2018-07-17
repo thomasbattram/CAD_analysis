@@ -38,38 +38,38 @@ rect.hclust(PRhoTree , h = 0.20, border = "red")
 dev.off()
 
 # NEW CODE USING GGPLOT!!!!
-hcdata <- dendro_data(PRhoTree, type = "rectangle")
-str(hcdata)
-hc_clusters <- data.frame(label = names(k), clust = k)
-rownames(hc_clusters) <- NULL
+# hcdata <- dendro_data(PRhoTree, type = "rectangle")
+# str(hcdata)
+# hc_clusters <- data.frame(label = names(k), clust = k)
+# rownames(hc_clusters) <- NULL
 
-hc_labs <- label(hcdata) %>%
-	mutate(assoc = ifelse(label %in% assoc_met, "associated \n", "not \nassociated")) %>%
-	left_join(hc_clusters)
+# hc_labs <- label(hcdata) %>%
+# 	mutate(assoc = ifelse(label %in% assoc_met, "associated \n", "not \nassociated")) %>%
+# 	left_join(hc_clusters)
 
-temp_hc_labs <- list()
-for (i in unique(hc_labs$clust)) {
-	temp <- dplyr::filter(hc_labs, clust == i) %>%
-		mutate(xmin = min(x) - 0.4) %>%
-		mutate(xmax = max(x) + 0.4)
-	temp_hc_labs[[i]] <- temp
-}
+# temp_hc_labs <- list()
+# for (i in unique(hc_labs$clust)) {
+# 	temp <- dplyr::filter(hc_labs, clust == i) %>%
+# 		mutate(xmin = min(x) - 0.4) %>%
+# 		mutate(xmax = max(x) + 0.4)
+# 	temp_hc_labs[[i]] <- temp
+# }
 
-hc_labs2 <- do.call(rbind, temp_hc_labs)
-hc_labs2 <- arrange(hc_labs2, x)
+# hc_labs2 <- do.call(rbind, temp_hc_labs)
+# hc_labs2 <- arrange(hc_labs2, x)
 
-p <- ggplot() + 
-  geom_segment(data=segment(hcdata), aes(x=x, y=y, xend=xend, yend=yend)) +
-  geom_text(data=hc_labs2, aes(x=x, y=y, label=label, hjust=1, colour = assoc), angle = 90, size=2) + 
-  # geom_hline(yintercept = 0.2, colour = "red") +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(),
-  		axis.title.x = element_blank(), legend.title = element_blank()) +
-  geom_rect(data = hc_labs2, aes(xmin = xmin, xmax = xmax, ymin = -0.1, ymax = 0.2),
-					fill = alpha("grey",0), colour = "red", size = 0.01) + 
-  scale_colour_manual(values = c("green", "black")) +
-  labs(y = "Height", title = "1 - Pearson Rho Cluster Dendrogram")
+# p <- ggplot() + 
+#   geom_segment(data=segment(hcdata), aes(x=x, y=y, xend=xend, yend=yend)) +
+#   geom_text(data=hc_labs2, aes(x=x, y=y, label=label, hjust=1, colour = assoc), angle = 90, size=2) + 
+#   # geom_hline(yintercept = 0.2, colour = "red") +
+#   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(),
+#   		axis.title.x = element_blank(), legend.title = element_blank()) +
+#   geom_rect(data = hc_labs2, aes(xmin = xmin, xmax = xmax, ymin = -0.1, ymax = 0.2),
+# 					fill = alpha("grey",0), colour = "red", size = 0.01) + 
+#   scale_colour_manual(values = c("green", "black")) +
+#   labs(y = "Height", title = "1 - Pearson Rho Cluster Dendrogram")
 
-ggsave("outputs/other/new_dendrogram.pdf", plot = p, width = 20, height = 12)
+# ggsave("outputs/other/new_dendrogram.pdf", plot = p, width = 20, height = 12)
 
 # ------------------------------------------------------------------
 # Produce dendrogram and colour variables for heatmaps
