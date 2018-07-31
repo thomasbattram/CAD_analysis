@@ -34,25 +34,6 @@ d <- d %>%
 CAD_score_lr_nr <- linearRegress('CAD_score', nr_mnames, d, "age")
 
 # ------------------------------------------------------------------
-# CAD-GRS vs. metabolites qq 
-# ------------------------------------------------------------------
-# Create expected and observed p value columns (x and y)
-res_out <- CAD_score_lr_nr %>%
-  mutate(exp_p = (1:nrow(.))/(nrow(.)+1)) %>%
-  mutate(x = -log10(exp_p)) %>%
-  mutate(y = -log10(sort(`Pr(>|t|)`)))
-
-l <- list(estlambda(res_out$`Pr(>|t|)`))
-nom <- paste("CAD scores vs. all metabolites", "\n", "number of tests = ", nrow(res_out), "\nlambda = ", round(l[[1]]$estimate, 3), ", se = ", round(l[[1]]$se, 3), sep = "") 
-p <- ggplot(res_out, aes(x = x, y = y)) +
-  geom_point(colour = "blue") +
-  geom_abline(slope = 1, intercept = 0, colour = "red") +
-  #ggtitle(nom) +
-  theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), axis.text = element_text(size = 20)) +
-  labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)))
-ggsave("outputs/other/CAD_score_qq.pdf", plot = p, width = 15, height = 10, units = "in")
-
-# ------------------------------------------------------------------
 # CAD-GRS vs. grouped lipoproteins qq 
 # ------------------------------------------------------------------
 
@@ -61,13 +42,8 @@ CAD_score_lr_nr <- left_join(CAD_score_lr_nr, subset_df)
 CAD_score_lr_nr$group <- as.factor(CAD_score_lr_nr$group)
 CAD_score_lr_nr$subset <- as.factor(CAD_score_lr_nr$subset)
 
-# Remove metabolites not grouped (non-lipoproteins and composite values)
-dat <- CAD_score_lr_nr[-which(is.na(CAD_score_lr_nr$group)), ]
-str(dat)
-dat$subset <- factor(dat$subset, levels = c("LDL", "Atherogenic_non_LDL", "Large_VLDL", "Small_HDL", "Large_HDL", "V_Large_HDL"))
-
 # Create expected and observed p value columns (x and y)
-res_out <- dat %>%
+res_out <- CAD_score_lr_nr %>%
   arrange(`Pr(>|t|)`) %>%
   mutate(exp_p = (1:nrow(.))/(nrow(.)+1)) %>%
   mutate(x = -log10(exp_p)) %>%
@@ -76,31 +52,48 @@ res_out <- dat %>%
 # Create the plot
 l <- estlambda(res_out$`Pr(>|t|)`)
 nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = ", nrow(res_out), "\nlambda = ", round(l$estimate, 3), ", se = ", round(l$se, 3), sep = "")
-  p <- ggplot(res_out, aes(x = x, y = y, group = group, colour = subset)) +
-    geom_point(aes(shape = factor(group)), size = 3) +
+  p <- ggplot(res_out, aes(x = x, y = y, colour = subset)) +
+    geom_point(size = 3) +
     geom_abline(slope = 1, intercept = 0, colour = "red") +
     #ggtitle(nom) +
-    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 20), legend.title = element_blank(), axis.text = element_text(size = 20)) +
-    labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P))) +
-    scale_colour_hue(breaks = levels(res_out[["subset"]])) #+
+    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 15), legend.title = element_blank(), axis.text = element_text(size = 20)) +
+    labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)))# +
+    # scale_colour_hue(breaks = levels(res_out[["subset"]])) #+
+
+p <- p + scale_colour_manual(breaks = c("Small_HDL", "Large_HDL", "V_Large_HDL", "LDL", 
+                                      "Atherogenic_non_LDL", "Large_VLDL", "other"), 
+                           values=c("Small_HDL" = "red", "Large_HDL" = "blue", "V_Large_HDL" = "green", "LDL" = "yellow", 
+                                    "Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "other" = "grey"))
+
 
 ggsave("outputs/other/CAD_score_vs_lipoprotein_subclasses_QQ.pdf", plot = p, width = 15, height = 10, units = "in")
 
 # ------------------------------------------------------------------
 # Differences between subsets 
 # ------------------------------------------------------------------
+# Remove metabolites not grouped (non-lipoproteins and composite values)
+dat <- res_out[-which(is.na(res_out$group)), ]
+str(dat)
+dat$subset <- factor(dat$subset, levels = c("LDL", "Atherogenic_non_LDL", "Large_VLDL", "Small_HDL", "Large_HDL", "V_Large_HDL"))
+
 # Boxplot looking at effect size differences between groups
-p <- ggplot(res_out) +
+p <- ggplot(dat) +
   geom_violin(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset), 
               draw_quantiles = c(0.5)) +
   geom_jitter(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate)), height = 0,
               width = 0.1) +
   labs(x = "Particle size class", y = "Effect estimate") +
-  theme(text = element_text(size = 30), axis.text = element_text(size = 20), legend.position = "none", axis.title.x = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
+  theme(text = element_text(size = 30), axis.text = element_text(size = 20), axis.title.x = element_blank(), axis.line = element_line(colour = "black"))# +
+  # scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
+
+p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "V_Large_HDL", "LDL", 
+                                      "Atherogenic_non_LDL", "Large_VLDL", "other"), 
+                           values=c("Small_HDL" = "red", "Large_HDL" = "blue", "V_Large_HDL" = "green", "LDL" = "yellow", 
+                                    "Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "other" = "grey"))
 
 ggsave("outputs/other/lipoprotein_subclass_effect_comparison.pdf", plot = p, width = 15, height = 10, units = "in")
-nrow(res_out) # 98 lipoproteins
+
+nrow(dat) # 98 lipoproteins
 
 # Testing for normality within group estimates
 shap_test <- vector(mode = "list", length = length(unique(res_out$subset)))
@@ -123,7 +116,7 @@ write.table(dunn_res, "outputs/tables/lipoprotein_subclass_kw_test.txt", quote =
 CAD_assoc <- CAD_score_lr_nr %>%
   mutate(Bonferroni = p.adjust(`Pr(>|t|)`, method = "bonferroni")) %>%
   mutate(FDR = p.adjust(`Pr(>|t|)`, method = "fdr")) %>%
-  filter(FDR < 0.05)
+  dplyr::filter(FDR < 0.05)
 
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
@@ -143,12 +136,9 @@ assoc_met <- filter(CAD_tab, FDR < 0.05) %>%
   dplyr::select(Metabolite)
 assoc_met <- assoc_met[, 1]
 
-assoc_tab <- dplyr::select(d, one_of(assoc_met))
-
-D <-  as.dist(1 - abs(cor(assoc_tab)))
-PRhoTree <- hclust(D, method = "complete")
-k <- cutree(PRhoTree, h = 0.2) ## distances are in 1 - Pearson Rho distances
-table(k) ## 20 Clusters
+assoc_met <- subset_df %>%
+  dplyr::filter(Metabolite %in% assoc_met)
+length(unique(assoc_met$cluster)) # 20
 
 print("CAD-GRS analysis complete - please proceed to the Individual variant analysis")
 
