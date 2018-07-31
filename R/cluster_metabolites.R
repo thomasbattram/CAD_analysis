@@ -143,8 +143,6 @@ K3 <- ordered_df2[["Metabolite"]]
 names(K3) <- ordered_df2[["subset"]]
 
 ColCol3 <- CC2[names(K3)]
-col2rgb(CC2)
-hist(1:1500, col=CC2, breaks = 15)
 
 ## add clusters to subset_df
 clusters <- data.frame(Metabolite = names(k), cluster = k)
