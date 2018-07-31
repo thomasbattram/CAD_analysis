@@ -116,7 +116,7 @@ length(mnames) - length(nr_mnames) #81
 # Generate biological subsets
 # ------------------------------------------------------------------
 # Generate the lipoprotein subsets 
-Large_VLDL <- grep(paste(c("xxl-VLDL", "xl-VLDL", "l-VLDL"), collapse = "|"), nr_mnames, value = TRUE)
+Large_VLDL <- grep(paste(c("xxl-VLDL", "xl-VLDL", "l-VLDL", "^VLDL-"), collapse = "|"), nr_mnames, value = TRUE)
 Atherogenic_non_LDL <- grep(paste(c("m-VLDL", "s-VLDL", "xs-VLDL", "IDL"), collapse = "|"), nr_mnames, value = TRUE)
 LDL <- grep(paste(c("l-LDL", "m-LDL", "s-LDL"), collapse = "|"), nr_mnames, value = TRUE)
 V_Large_HDL <- grep(c("xl-HDL"), nr_mnames, value = TRUE) 
@@ -133,9 +133,12 @@ fatty_acids <- c("Tot-FA", "FALen", "UnsatDeg", "DHA", "LA", "CLA", "FAw3", "FAw
 amino_acids <- c("Ala", "Gln", "His", "Ile", "Leu", "Val", "Phe", "Tyr")
 glycolysis <- c("Glc", "Lac", "Pyr", "Cit", "glucose", "insulin")
 other <- c("Ace", "AcAce", "bOHBut", "Crea", "Alb", "Gp")
+other <- c(other, diameter, cholesterol, glycerides, phospholipids, apolipo, fatty_acids, amino_acids,
+           glycolysis)
 
-subsets <- list(Large_VLDL, Atherogenic_non_LDL, LDL, V_Large_HDL, Large_HDL, Small_HDL, diameter, cholesterol, glycerides, phospholipids, apolipo, fatty_acids, amino_acids, glycolysis, other)
-names(subsets) <- c("Large_VLDL", "Atherogenic_non_LDL", "LDL", "V_Large_HDL", "Large_HDL", "Small_HDL", "diameter", "cholesterol", "glycerides", "phospholipids", "apolipo", "fatty_acids", "amino_acids", "glycolysis", "other")
+# subsets <- list(Large_VLDL, Atherogenic_non_LDL, LDL, V_Large_HDL, Large_HDL, Small_HDL, diameter, cholesterol, glycerides, phospholipids, apolipo, fatty_acids, amino_acids, glycolysis, other)
+subsets <- list(Large_VLDL, Atherogenic_non_LDL, LDL, V_Large_HDL, Large_HDL, Small_HDL, other)
+names(subsets) <- c("Large_VLDL", "Atherogenic_non_LDL", "LDL", "V_Large_HDL", "Large_HDL", "Small_HDL", "other")
 
 subset_df <- data.frame(Metabolite = nr_mnames, subset = NA, group = NA)
 
