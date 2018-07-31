@@ -38,38 +38,59 @@ rect.hclust(PRhoTree , h = 0.20, border = "red")
 dev.off()
 
 # NEW CODE USING GGPLOT!!!!
-# hcdata <- dendro_data(PRhoTree, type = "rectangle")
-# str(hcdata)
-# hc_clusters <- data.frame(label = names(k), clust = k)
-# rownames(hc_clusters) <- NULL
+hcdata <- dendro_data(PRhoTree, type = "rectangle")
+str(hcdata)
+hc_clusters <- data.frame(label = names(k), clust = k)
+rownames(hc_clusters) <- NULL
 
-# hc_labs <- label(hcdata) %>%
-# 	mutate(assoc = ifelse(label %in% assoc_met, "associated \n", "not \nassociated")) %>%
-# 	left_join(hc_clusters)
+hc_labs <- label(hcdata) %>%
+	left_join(hc_clusters) %>%
+	left_join(subset_df, by = c("label" = "Metabolite")) %>%
+	mutate(subset = ifelse(is.na(group), "other", subset))
 
-# temp_hc_labs <- list()
+temp_hc_labs <- list()
 # for (i in unique(hc_labs$clust)) {
-# 	temp <- dplyr::filter(hc_labs, clust == i) %>%
-# 		mutate(xmin = min(x) - 0.4) %>%
-# 		mutate(xmax = max(x) + 0.4)
-# 	temp_hc_labs[[i]] <- temp
+# 	temp <- dplyr::filter(hc_labs, clust == i)
+# 	temp2 <- list()
+# 	for (j in unique(temp$subset)) {
+# 		temp2 <- dplyr::filter(temp, subset == j)
+# 		x <- temp2[["x"]]
+# 		nr <- 1
+# 		while (temp2[nr, "x"] - temp2[nr+1, "x"] == -1) {
+
+# 		}
+# 		temp2[[j]] <- dplyr::filter(temp, subset == j) %>%
+# 			mutate(xmin = min(x) - 0.5) %>% # CHANGED FROM 0.4 TO 0.5!!!
+# 			mutate(xmax = max(x) + 0.5)
+# 	}
+# 	temp_hc_labs[[i]] <- do.call(rbind, temp2)
 # }
 
+hc_labs %>%
+	mutate(xmin = x - 0.5) %>%
+	mutate(xmax = x + 0.5) -> hc_labs2
+
+
 # hc_labs2 <- do.call(rbind, temp_hc_labs)
-# hc_labs2 <- arrange(hc_labs2, x)
+hc_labs2 <- arrange(hc_labs2, x)
 
-# p <- ggplot() + 
-#   geom_segment(data=segment(hcdata), aes(x=x, y=y, xend=xend, yend=yend)) +
-#   geom_text(data=hc_labs2, aes(x=x, y=y, label=label, hjust=1, colour = assoc), angle = 90, size=2) + 
-#   # geom_hline(yintercept = 0.2, colour = "red") +
-#   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(),
-#   		axis.title.x = element_blank(), legend.title = element_blank()) +
-#   geom_rect(data = hc_labs2, aes(xmin = xmin, xmax = xmax, ymin = -0.1, ymax = 0.2),
-# 					fill = alpha("grey",0), colour = "red", size = 0.01) + 
-#   scale_colour_manual(values = c("green", "black")) +
-#   labs(y = "Height", title = "1 - Pearson Rho Cluster Dendrogram")
+p <- ggplot() + 
+  geom_segment(data=segment(hcdata), aes(x=x, y=y, xend=xend, yend=yend)) +
+  geom_text(data=hc_labs2, aes(x=x, y=y, label=label, hjust=1), angle = 90, size=2) + 
+  geom_hline(yintercept = 0.2, colour = "red") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.x = element_blank(),
+  		axis.title.x = element_blank(), legend.title = element_blank()) +
+  geom_rect(data = hc_labs2, aes(xmin = xmin, xmax = xmax, ymin = -0.2, ymax = -0.065, fill = subset),
+			size = 0.01) +
+  labs(y = "Height", title = "1 - Pearson Rho Cluster Dendrogram")
 
-# ggsave("outputs/other/new_dendrogram.pdf", plot = p, width = 20, height = 12)
+p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "V_Large_HDL", "LDL", 
+									  "Atherogenic_non_LDL", "Large_VLDL", "other"), 
+                           values=c("Small_HDL" = "red", "Large_HDL" = "blue", "V_Large_HDL" = "green", "LDL" = "yellow", 
+                           			"Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "other" = "grey"))
+
+
+ggsave("outputs/other/new_dendrogram.pdf", plot = p, width = 20, height = 12)
 
 # ------------------------------------------------------------------
 # Produce dendrogram and colour variables for heatmaps
@@ -126,6 +147,10 @@ col2rgb(CC2)
 hist(1:1500, col=CC2, breaks = 15)
 
 ## add clusters to subset_df
+clusters <- data.frame(Metabolite = names(k), cluster = k)
+rownames(clusters) <- NULL
+
 subset_df <- subset_df %>%
 	left_join(clusters)
 
+dplyr::filter(subset_df, !is.na(group))
