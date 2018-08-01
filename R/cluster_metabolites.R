@@ -120,7 +120,7 @@ save(Pden, ColCol, file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 # ------------------------------------------------------------------
 # Produce a colour variable based on biological grouping
 # ------------------------------------------------------------------
-
+set.seed(2)
 CC2 <- sample(colorRampPalette(brewer.pal(9, "Set1"))(length(subsets)))
 names(CC2) <- c(names(subsets))
 
@@ -151,4 +151,12 @@ rownames(clusters) <- NULL
 subset_df <- subset_df %>%
 	left_join(clusters)
 
-dplyr::filter(subset_df, !is.na(group))
+
+
+# counting clusters in each subset
+temp <- dplyr::filter(subset_df, !is.na(group))
+clust_tab <- as.matrix(table(temp$subset, temp$cluster))
+apply(clust_tab, 1, function(x){sum(x > 0)})
+
+
+
