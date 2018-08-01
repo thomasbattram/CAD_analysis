@@ -46,7 +46,7 @@ rownames(hc_clusters) <- NULL
 hc_labs <- label(hcdata) %>%
 	left_join(hc_clusters) %>%
 	left_join(subset_df, by = c("label" = "Metabolite")) %>%
-	mutate(subset = ifelse(is.na(group), "other", subset))
+	mutate(subset = ifelse(is.na(group), "Other", subset))
 
 temp_hc_labs <- list()
 # for (i in unique(hc_labs$clust)) {
@@ -84,10 +84,10 @@ p <- ggplot() +
 			size = 0.01) +
   labs(y = "Height", title = "1 - Pearson Rho Cluster Dendrogram")
 
-p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "V_Large_HDL", "LDL", 
-									  "Atherogenic_non_LDL", "Large_VLDL", "other"), 
-                           values=c("Small_HDL" = "red", "Large_HDL" = "blue", "V_Large_HDL" = "green", "LDL" = "yellow", 
-                           			"Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "other" = "grey"))
+p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "Very_Large_HDL", "LDL", 
+									  "Atherogenic_non_LDL", "Large_VLDL", "Other"), 
+                           values=c("Small_HDL" = "red", "Large_HDL" = "blue", "Very_Large_HDL" = "green", "LDL" = "yellow", 
+                           			"Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "Other" = "grey"))
 
 
 ggsave("outputs/other/new_dendrogram.pdf", plot = p, width = 20, height = 12)
