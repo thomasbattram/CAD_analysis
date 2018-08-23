@@ -145,7 +145,7 @@ p <- ggplot(res_out, aes(x = reorder(subset, abs(Estimate), FUN = median), y = a
   geom_boxplot() +
   labs(x = "Particle size class", y = "Effect estimate", legend = "Age") +
   theme(text = element_text(size = 25), axis.title.x = element_blank(), axis.line = element_line(colour = "black"), axis.text = element_text(size = 20)) +
-  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL particles", "LDL" = "LDL")) +
+  scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "Very_large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL")) +
   scale_fill_discrete(name = "Age", breaks = levels(res_out$age))
 
 ggsave("outputs/other/age_strat_lipoprotein_subclass_effect_comparison.pdf", plot = p, width = 15, height = 10, units = "in")

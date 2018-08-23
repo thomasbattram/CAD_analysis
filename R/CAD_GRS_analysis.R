@@ -53,18 +53,15 @@ res_out <- CAD_score_lr_nr %>%
 l <- estlambda(res_out$`Pr(>|t|)`)
 nom <- paste("CAD score vs. lipoprotein metabolites", "\n", "number of tests = ", nrow(res_out), "\nlambda = ", round(l$estimate, 3), ", se = ", round(l$se, 3), sep = "")
   p <- ggplot(res_out, aes(x = x, y = y, colour = subset)) +
-    geom_point(size = 3) +
+    geom_point(size = 4) +
     geom_abline(slope = 1, intercept = 0, colour = "red") +
     #ggtitle(nom) +
-    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 30), legend.text = element_text(size = 15), legend.title = element_blank(), axis.text = element_text(size = 20)) +
+    theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 25), legend.text = element_text(size = 20), legend.key.size = unit(1.3, "cm"), legend.title = element_blank(), axis.text = element_text(size = 20)) +
     labs(x = expression(Expected ~ ~-log[10](P)), y = expression(Observed ~ ~-log[10](P)))# +
     # scale_colour_hue(breaks = levels(res_out[["subset"]])) #+
 
-p <- p + scale_colour_manual(breaks = c("Small_HDL", "Large_HDL", "V_Large_HDL", "LDL", 
-                                      "Atherogenic_non_LDL", "Large_VLDL", "other"), 
-                           values=c("Small_HDL" = "red", "Large_HDL" = "blue", "V_Large_HDL" = "green", "LDL" = "yellow", 
-                                    "Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "other" = "grey"))
-
+p <- p + scale_colour_manual(breaks = names(CC2), 
+                           values = CC2)
 
 ggsave("outputs/other/CAD_score_vs_lipoprotein_subclasses_QQ.pdf", plot = p, width = 15, height = 10, units = "in")
 
@@ -74,22 +71,22 @@ ggsave("outputs/other/CAD_score_vs_lipoprotein_subclasses_QQ.pdf", plot = p, wid
 # Remove metabolites not grouped (non-lipoproteins and composite values)
 dat <- res_out[-which(is.na(res_out$group)), ]
 str(dat)
-dat$subset <- factor(dat$subset, levels = c("LDL", "Atherogenic_non_LDL", "Large_VLDL", "Small_HDL", "Large_HDL", "V_Large_HDL"))
+dat$subset <- factor(dat$subset, levels = c("LDL", "Atherogenic_non_LDL", "Large_VLDL", "Small_HDL", "Large_HDL", "Very_large_HDL"))
 
 # Boxplot looking at effect size differences between groups
 p <- ggplot(dat) +
   geom_violin(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate), fill = subset), 
               draw_quantiles = c(0.5)) +
   geom_jitter(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate)), height = 0,
-              width = 0.1) +
+              width = 0.05) +
   labs(x = "Particle size class", y = "Effect estimate") +
-  theme(text = element_text(size = 30), axis.text = element_text(size = 20), axis.title.x = element_blank(), axis.line = element_line(colour = "black"))# +
+  theme(text = element_text(size = 25), axis.text = element_text(angle = 30, size = 20, hjust = 1), axis.title.x = element_blank(),
+        axis.line = element_line(colour = "black"), legend.title = element_blank(), legend.text = element_text(size = 20),
+        legend.key.size = unit(1.3, "cm"))# +
   # scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
 
-p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "V_Large_HDL", "LDL", 
-                                      "Atherogenic_non_LDL", "Large_VLDL", "other"), 
-                           values=c("Small_HDL" = "red", "Large_HDL" = "blue", "V_Large_HDL" = "green", "LDL" = "yellow", 
-                                    "Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "other" = "grey"))
+p <- p + scale_fill_manual(breaks = names(CC2), 
+                           values = CC2)
 
 ggsave("outputs/other/lipoprotein_subclass_effect_comparison.pdf", plot = p, width = 15, height = 10, units = "in")
 
@@ -105,8 +102,8 @@ for (i in res_out$subset) {
 shap_test
 # The estimates within many subsets are not normally distributed - use kruskal-wallis test
 
-kw_test <- kruskal.test(Estimate ~ subset, data = res_out) 
-dunn_test <- dunnTest(Estimate ~ subset, data = res_out, method = "bh")
+kw_test <- kruskal.test(abs(Estimate) ~ subset, data = res_out) 
+dunn_test <- dunnTest(abs(Estimate) ~ subset, data = res_out, method = "bh")
 dunn_res <- dunn_test[[2]]
 write.table(dunn_res, "outputs/tables/lipoprotein_subclass_kw_test.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 
@@ -139,6 +136,8 @@ assoc_met <- assoc_met[, 1]
 assoc_met <- subset_df %>%
   dplyr::filter(Metabolite %in% assoc_met)
 length(unique(assoc_met$cluster)) # 20
+sum(table(assoc_met$cluster) == 1)
+
 
 print("CAD-GRS analysis complete - please proceed to the Individual variant analysis")
 
