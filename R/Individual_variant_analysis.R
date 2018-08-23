@@ -22,6 +22,8 @@ for(i in 1:length(indi_SNP_results_nr)) {
   indi_SNP_results_nr[[i]]$FDR <- p.adjust(indi_SNP_results_nr[[i]]$`Pr(>|t|)`, method = "fdr", n = (length(SNPs) * length(nr_mnames)))
 }
 
+save(indi_SNP_results_nr, file = "outputs/other/all_indi_res.RData")
+
 p_score_nr <- 0.05/length(nr_mnames)
 
 # Make a list of the results containing the "significant" p values
@@ -75,7 +77,6 @@ saveWorkbook(workbook, file = "outputs/tables/FDR_significant_SNP-metab_associat
 # ------------------------------------------------------------------
 # Heatmaps
 # ------------------------------------------------------------------
-source("R/Dendrogram_production.R")
 load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 
 # Produce heatmaps using differing cluster methods and effect values
@@ -120,14 +121,11 @@ for (i in 1:2) {
       ColSC <- ColCol
       fin_dat <- db[order(row.names(db)), ]
     } else if (cluster == "biological") {
-      ColCol2[names(ColCol2) == "Other"] <- "white"
       Colv <- FALSE
       den <- "none"
       ColSC <- ColCol2
       fin_dat <- db
     }
-
-    ColSC <- ColCol3
 
     fin_dat <- as.matrix(fin_dat)
 
@@ -137,7 +135,7 @@ for (i in 1:2) {
     heat1 <- fin_dat[, !(colnames(fin_dat) %in% HMGCR_SNPs)]
 
     pdf(paste0("outputs/heatmaps/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
-    heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = "both", Colv =  Pden, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+    heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = "none", Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
     print(heatmap)
     dev.off()
     ####### The colours aren't correct - need to find a way to change the ordering step!!!!
@@ -158,7 +156,7 @@ for (i in 1:2) {
 
 
     pdf(paste0("outputs/heatmaps/sig_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
-    heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+    heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1.15, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
     dev.off()
 
   }
