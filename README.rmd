@@ -12,3 +12,4 @@ Running Masterfile.R will complete all of the analyses once everything is setup,
 * The Individual_variant_analysis.R script needs to be ran once before the New_GRS_analysis.R script
 * Within "outputs", directories named "forests", "tables", "heatmaps" and "other" will need to be made if you are to follow the scripts exactly - of course where the results are outputted and the names of the outputs can be easily changed within the scripts
 
+https://zenodo.org/badge/107681515.svg
