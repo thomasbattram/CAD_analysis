@@ -16,27 +16,30 @@ make_pretty <- function (num, digits) {
   as.numeric(formatC(signif(num, digits), digits = digits, format = "fg", flag = "#"))
 }
 
+args <- commandArgs(trailingOnly = T)
+met_file <- args[1]
+gen_file <- args[2]
+cohort_char_file <- args[3]
+
 # ------------------------------------------------------------------
 # Read in all the data 
 # ------------------------------------------------------------------
-
-datafile_metabs <- read_dta("/Volumes/ALSPAC-Data/Current/Other/Samples/Child/child_metabolomics_1b.dta") %>%
+datafile_metabs <- read_dta(met_file) %>%
   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
   dplyr::select(u_ID, everything())
 
-datafile_SNPs <- read.table("inputs/cadsites_new", header = T) %>%
+datafile_SNPs <- read.table(gen_file, header = T) %>%
   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
   dplyr::select(u_ID, everything())
 
 head(datafile_SNPs)
 
-SNP_info <- read_csv("new_CAD_gwas_SNPs.csv")
-SNP_info
+SNP_info <- read_csv("inputs/cad_gwas_snps.csv")
 # ------------------------------------------------------------------
 # Produce weighted variants with correct effect allele
 # ------------------------------------------------------------------
 
-genotype_alleles <- read.table("inputs/alleles_new.txt", header = F, stringsAsFactors = F)
+genotype_alleles <- read.table("inputs/alleles.txt", header = F, stringsAsFactors = F)
 colnames(genotype_alleles) <- c("CHR", "SNP", "POS", "other_allele", "ref_allele")
 
 # Change indels to insertion/deletion rather than actual bases
@@ -88,7 +91,7 @@ for (i in variants) {
 # ------------------------------------------------------------------
 # Merge the ages and and extract useful info
 # ------------------------------------------------------------------
-source("R/Merge.R")
+source("R/merge.R")
 # merge 
 d <- left_join(df_main, datafile_SNPs_W) %>%
   dplyr::select(u_ID, aln, qlet, age, everything()) %>%
@@ -168,7 +171,5 @@ source("R/cluster_metabolites.R")
 write.table(subset_df, file = "outputs/tables/subset_table.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 
 print("setup complete - please proceed to the CAD-GRS analysis")
-
-
 
 

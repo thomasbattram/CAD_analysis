@@ -26,8 +26,8 @@ save(indi_SNP_results_nr, file = "outputs/other/all_indi_res.RData")
 
 p_score_nr <- 0.05/length(nr_mnames)
 
-# Make a list of the results containing the "significant" p values
-extract_sig_hits <- function(data, type = "bon") {
+# Make a list of the results below the p value threshold
+extract_hits <- function(data, type = "bon") {
   output <- list()
   for (i in names(data)) {
     if (type == "bon") {
@@ -42,15 +42,15 @@ extract_sig_hits <- function(data, type = "bon") {
   output
 }
 
-sig_nr <- extract_sig_hits(indi_SNP_results_nr)
-sig_nr_FDR <- extract_sig_hits(indi_SNP_results_nr, type = "fdr")
+hits <- extract_hits(indi_SNP_results_nr)
+hits_fdr <- extract_hits(indi_SNP_results_nr, type = "fdr")
 
 # Write the results into tables
-names_sig_nr <- names(sig_nr)
-names_sig_nr_FDR <- names(sig_nr_FDR)
+names_hits <- names(hits)
+names_hits_fdr <- names(hits_fdr)
 
-write.table(names_sig_nr, "outputs/other/significant_SNPs.txt", quote = F, col.names = F, row.names = F, sep = "\t")
-write.table(names_sig_nr_FDR, "outputs/other/FDR_significant_SNPs.txt", quote = F, col.names = F, row.names = F, sep = "\t")
+write.table(names_hits, "outputs/other/hits.txt", quote = F, col.names = F, row.names = F, sep = "\t")
+write.table(names_hits_fdr, "outputs/other/fdr_hits.txt", quote = F, col.names = F, row.names = F, sep = "\t")
 
 CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
@@ -60,8 +60,8 @@ CAD_tab <- arrange(CAD_score_lr_nr, `Pr(>|t|)`) %>%
   dplyr::select(Metabolite, `Estimate (95% CI)`, P)
 
 workbook <- createWorkbook()
-for (i in names_sig_nr_FDR) {
-  temp_dat <- sig_nr_FDR[[i]] %>%
+for (i in names_hits_fdr) {
+  temp_dat <- hits_fdr[[i]] %>%
     mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
     mutate(FDR = make_pretty(FDR, 3)) %>%
     mutate(low_CI = make_pretty(`2.5 %`, 3)) %>%
@@ -140,7 +140,7 @@ for (i in 1:2) {
     dev.off()
     ####### The colours aren't correct - need to find a way to change the ordering step!!!!
     # Make a heatmap with just the SNPs associated with metabolites and the HMGCR SNPs
-    new_fin_dat <- fin_dat[, c(names_sig_nr_FDR, HMGCR_SNPs)]
+    new_fin_dat <- fin_dat[, c(names_hits_FDR, HMGCR_SNPs)]
 
     gene_info <- SNP_info %>%
       dplyr::select(Lead_variant, gene) %>%
@@ -161,4 +161,3 @@ for (i in 1:2) {
 
   }
 }
-

@@ -9,7 +9,8 @@ temp <- dplyr::select(d, aln, qlet, age, CAD_score)
 write.table(temp, file = "outputs/other/cad_score.txt", col.names = T, row.names = F, quote = F, sep = "\t")
 
 # source("R/get_cohort_chars.R")
-co_chars <- read.delim("outputs/tables/cohort_chars.txt", stringsAsFactors = F)
+# co_chars <- read.delim("outputs/tables/cohort_chars.txt", stringsAsFactors = F)
+co_chars <- read.delim(cohort_char_file, stringsAsFactors = F)
 
 summary(d$CAD_score) 
 # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -80,9 +81,9 @@ p <- ggplot(dat) +
   geom_jitter(aes(x = reorder(subset, abs(Estimate), FUN = median), y = abs(Estimate)), height = 0,
               width = 0.05) +
   labs(x = "Particle size class", y = "Effect estimate") +
-  theme(text = element_text(size = 25), axis.text = element_text(angle = 30, size = 20, hjust = 1), axis.title.x = element_blank(),
-        axis.line = element_line(colour = "black"), legend.title = element_blank(), legend.text = element_text(size = 20),
-        legend.key.size = unit(1.3, "cm"))# +
+  theme(text = element_text(size = 25), axis.text.x = element_text(angle = 30, hjust = 1), axis.text = element_text(size = 20), 
+        axis.title.x = element_blank(), axis.line = element_line(colour = "black"), legend.title = element_blank(), 
+        legend.text = element_text(size = 20), legend.key.size = unit(1.3, "cm"))# +
   # scale_x_discrete(labels=c("Small_HDL" = "Small HDL", "V_Large_HDL" = "Very large HDL", "Large_VLDL" = "Large VLDL", "Large_HDL" = "Large HDL", "Atherogenic_non_LDL" = "Atherogenic non-LDL", "LDL" = "LDL"))
 
 p <- p + scale_fill_manual(breaks = names(CC2), 
@@ -140,7 +141,5 @@ sum(table(assoc_met$cluster) == 1)
 
 
 print("CAD-GRS analysis complete - please proceed to the Individual variant analysis")
-
-
 
 

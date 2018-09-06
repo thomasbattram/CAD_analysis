@@ -49,22 +49,24 @@ hc_labs <- label(hcdata) %>%
 	mutate(subset = ifelse(is.na(group), "Other", subset))
 
 temp_hc_labs <- list()
-# for (i in unique(hc_labs$clust)) {
-# 	temp <- dplyr::filter(hc_labs, clust == i)
-# 	temp2 <- list()
-# 	for (j in unique(temp$subset)) {
-# 		temp2 <- dplyr::filter(temp, subset == j)
-# 		x <- temp2[["x"]]
-# 		nr <- 1
-# 		while (temp2[nr, "x"] - temp2[nr+1, "x"] == -1) {
+for (i in unique(hc_labs$clust)) {
+	temp <- dplyr::filter(hc_labs, clust == i) %>%
+			mutate(xmin_clust = min(x) - 0.5) %>% # CHANGED FROM 0.4 TO 0.5!!!
+			mutate(xmax_clust = max(x) + 0.5)
 
-# 		}
-# 		temp2[[j]] <- dplyr::filter(temp, subset == j) %>%
-# 			mutate(xmin = min(x) - 0.5) %>% # CHANGED FROM 0.4 TO 0.5!!!
-# 			mutate(xmax = max(x) + 0.5)
-# 	}
-# 	temp_hc_labs[[i]] <- do.call(rbind, temp2)
-# }
+	temp_hc_labs[[i]] <- temp
+
+	# for (j in unique(temp$subset)) {
+	# 	temp2 <- dplyr::filter(temp, subset == j)
+	# 	x <- temp2[["x"]]
+	# 	nr <- 1
+	# 	temp2[[j]] <- dplyr::filter(temp, subset == j) 
+	# }
+	# temp_hc_labs[[i]] <- do.call(rbind, temp2)
+}
+
+hc_labs_clust <- do.call(rbind, temp_hc_labs) 
+hc_labs_clust <- arrange(as.data.frame(hc_labs_clust), x)
 
 hc_labs %>%
 	mutate(xmin = x - 0.5) %>%
@@ -82,6 +84,8 @@ p <- ggplot() +
   		axis.title.x = element_blank(), legend.title = element_blank()) +
   geom_rect(data = hc_labs2, aes(xmin = xmin, xmax = xmax, ymin = -0.2, ymax = -0.065, fill = subset),
 			size = 0.01) +
+  geom_rect(data = hc_labs_clust, aes(xmin = xmin_clust, xmax = xmax_clust, ymin = -0.2, ymax = -0.065),
+			size = 0.01, colour = "red", alpha = 0) +
   labs(y = "Height", title = "1 - Pearson Rho Cluster Dendrogram")
 
 p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "Very_Large_HDL", "LDL", 
@@ -91,7 +95,6 @@ p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "Very_Large_HDL"
 
 
 ggsave("outputs/other/new_dendrogram.pdf", plot = p, width = 20, height = 12)
-
 # ------------------------------------------------------------------
 # Produce dendrogram and colour variables for heatmaps
 # ------------------------------------------------------------------

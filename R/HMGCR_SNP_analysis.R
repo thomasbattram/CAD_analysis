@@ -19,7 +19,7 @@ for(i in 1:length(HMGCR_SNP_results_nr)) {
 }
 
 
-extract_sig_hits <- function(data, type = "bon") {
+extract_hits <- function(data, type = "bon") {
   output <- list()
   for (i in names(data)) {
     if (type == "bon") {
@@ -41,9 +41,9 @@ extract_sig_hits <- function(data, type = "bon") {
 # ----------------------------------------------------------------------------
 
 
-sig_nr <- extract_sig_hits(HMGCR_SNP_results_nr)
-for (i in names(sig_nr)) {
-  sig_nr[[i]] <- sig_nr[[i]] %>%
+hits <- extract_hits(HMGCR_SNP_results_nr)
+for (i in names(hits)) {
+  hits[[i]] <- hits[[i]] %>%
     arrange(`Pr(>|t|)`) %>%
     mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
     mutate(FDR = make_pretty(FDR, 3)) %>%
@@ -53,9 +53,9 @@ for (i in names(sig_nr)) {
     dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR)
 }
 
-sig_nr_FDR <- extract_sig_hits(HMGCR_SNP_results_nr, type = "fdr")
-for (i in names(sig_nr_FDR)) {
-  sig_nr_FDR[[i]] <- sig_nr_FDR[[i]] %>%
+hits_fdr <- extract_hits(HMGCR_SNP_results_nr, type = "fdr")
+for (i in names(hits_fdr)) {
+  hits_fdr[[i]] <- hits_fdr[[i]] %>%
     arrange(`Pr(>|t|)`) %>%
     mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
     mutate(FDR = make_pretty(FDR, 3)) %>%
@@ -65,9 +65,9 @@ for (i in names(sig_nr_FDR)) {
     dplyr::select(Metabolite, `Estimate (95% CI)`, P, FDR)
 }
 
-sig_nr_nom <- extract_sig_hits(HMGCR_SNP_results_nr, type = 0.05)
-for (i in names(sig_nr_nom)) {
-  sig_nr_nom[[i]] <- sig_nr_nom[[i]] %>%
+hits_nom <- extract_hits(HMGCR_SNP_results_nr, type = 0.05)
+for (i in names(hits_nom)) {
+  hits_nom[[i]] <- hits_nom[[i]] %>%
     arrange(`Pr(>|t|)`) %>%
     mutate(P = make_pretty(`Pr(>|t|)`, 3)) %>%
     mutate(FDR = make_pretty(FDR, 3)) %>%
@@ -79,8 +79,8 @@ for (i in names(sig_nr_nom)) {
 
 
 
-write.table(sig_nr_nom[["rs17238484"]], file = "outputs/tables/rs17238484_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
-write.table(sig_nr_nom[["rs12916"]], file = "outputs/tables/rs12916_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(hits_nom[["rs17238484"]], file = "outputs/tables/rs17238484_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+write.table(hits_nom[["rs12916"]], file = "outputs/tables/rs12916_sig_assoc.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 
 
 
