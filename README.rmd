@@ -1,7 +1,7 @@
-# Analysis of coronary artery disease genetic risk and the metabolome in adolescence
+# Analysis of coronary artery disease genetic risk and the metabolome in young individuals
 
 ## Description
-Files for the analysis of the association between coronary artery disease genetic risk and the metabolome in adolescence using data in ALSPAC
+Files for the analysis of the association between coronary artery disease genetic risk and the metabolome in young individuals using data in ALSPAC
 
 Running masterfile.sh (as below) will complete all of the analyses once everything is setup, please note the prerequisites below
 
