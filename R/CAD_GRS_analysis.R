@@ -9,7 +9,6 @@ temp <- dplyr::select(d, aln, qlet, age, CAD_score)
 write.table(temp, file = "outputs/other/cad_score.txt", col.names = T, row.names = F, quote = F, sep = "\t")
 
 # source("R/get_cohort_chars.R")
-# co_chars <- read.delim("outputs/tables/cohort_chars.txt", stringsAsFactors = F)
 co_chars <- read.delim(cohort_char_file, stringsAsFactors = F)
 
 summary(d$CAD_score) 

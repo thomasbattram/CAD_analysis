@@ -22,22 +22,15 @@ colnames(dat)
 RNTdat <- apply(dplyr::select(dat, -u_ID), 2, rntransform)
 
 # ------------------------------------------------------------------
-#  Repeat analysis but use the Pearson Rho
-#  values as distances for the dendrogram
+# Make dendrogram using Pearson Rho values as distances 
 # ------------------------------------------------------------------
+# clustering and tree generation
 D <-  as.dist(1 - abs(cor(RNTdat)))
 PRhoTree <- hclust(D, method = "complete")
 k <- cutree(PRhoTree, h = 0.2) ## distances are in 1 - Pearson Rho distances
 table(k) ## 42 Clusters
 
-# Plot dendrogram
-pdf(paste0("outputs/other/Clustering_DendRect.pdf"), width = 20, height = 12)
-par(mfrow = c(1,1))
-plot(PRhoTree, hang = -1, cex = 0.5, main = "1 - Pearson Rho Cluster Dendrogram", col = "royalblue", lwd = 2)
-rect.hclust(PRhoTree , h = 0.20, border = "red")
-dev.off()
-
-# NEW CODE USING GGPLOT!!!!
+# making the dendrogram
 hcdata <- dendro_data(PRhoTree, type = "rectangle")
 str(hcdata)
 hc_clusters <- data.frame(label = names(k), clust = k)
@@ -55,14 +48,6 @@ for (i in unique(hc_labs$clust)) {
 			mutate(xmax_clust = max(x) + 0.5)
 
 	temp_hc_labs[[i]] <- temp
-
-	# for (j in unique(temp$subset)) {
-	# 	temp2 <- dplyr::filter(temp, subset == j)
-	# 	x <- temp2[["x"]]
-	# 	nr <- 1
-	# 	temp2[[j]] <- dplyr::filter(temp, subset == j) 
-	# }
-	# temp_hc_labs[[i]] <- do.call(rbind, temp2)
 }
 
 hc_labs_clust <- do.call(rbind, temp_hc_labs) 
@@ -73,7 +58,6 @@ hc_labs %>%
 	mutate(xmax = x + 0.5) -> hc_labs2
 
 
-# hc_labs2 <- do.call(rbind, temp_hc_labs)
 hc_labs2 <- arrange(hc_labs2, x)
 
 p <- ggplot() + 
@@ -94,31 +78,31 @@ p <- p + scale_fill_manual(breaks = c("Small_HDL", "Large_HDL", "Very_Large_HDL"
                            			"Atherogenic_non_LDL" = "purple", "Large_VLDL" = "orange", "Other" = "grey"))
 
 
-ggsave("outputs/other/new_dendrogram.pdf", plot = p, width = 20, height = 12)
-# ------------------------------------------------------------------
-# Produce dendrogram and colour variables for heatmaps
-# ------------------------------------------------------------------
+ggsave("outputs/other/dendrogram.pdf", plot = p, width = 20, height = 12)
+# # ------------------------------------------------------------------
+# # Produce dendrogram and colour variables for heatmaps
+# # ------------------------------------------------------------------
 
-Pden <- as.dendrogram(PRhoTree)
+# Pden <- as.dendrogram(PRhoTree)
 
-M <- RNTdat
-PMat <- as.dist(1 - abs(cor(M, use = "p")))
-PMat_Tree <- hclust(PMat, method = "complete")
-K <- cutree(PMat_Tree, h = 0.2)
-length(unique(K))
-temp <- which(table(K) == 1); K[K %in% temp] = 0; length(unique(K))
-x <- as.numeric(names(table(K))) + 100
-K <- K + 100
-for(i in 1:length(x)){
-  r  <- which(K == x[i])
-  K[r] <- i
-}
+# M <- RNTdat
+# PMat <- as.dist(1 - abs(cor(M, use = "p")))
+# PMat_Tree <- hclust(PMat, method = "complete")
+# K <- cutree(PMat_Tree, h = 0.2)
+# length(unique(K))
+# temp <- which(table(K) == 1); K[K %in% temp] = 0; length(unique(K))
+# x <- as.numeric(names(table(K))) + 100
+# K <- K + 100
+# for(i in 1:length(x)){
+#   r  <- which(K == x[i])
+#   K[r] <- i
+# }
 
-CC <- sample(colorRampPalette(brewer.pal(9, "Set1"))(length(unique(K))))
-names(CC) = 1:length(unique(K))
-ColCol = CC[K]
+# CC <- sample(colorRampPalette(brewer.pal(9, "Set1"))(length(unique(K))))
+# names(CC) = 1:length(unique(K))
+# ColCol = CC[K]
 
-save(Pden, ColCol, file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
+# save(Pden, ColCol, file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 
 # ------------------------------------------------------------------
 # Produce a colour variable based on biological grouping
@@ -153,8 +137,6 @@ rownames(clusters) <- NULL
 
 subset_df <- subset_df %>%
 	left_join(clusters)
-
-
 
 # counting clusters in each subset
 temp <- dplyr::filter(subset_df, !is.na(group))

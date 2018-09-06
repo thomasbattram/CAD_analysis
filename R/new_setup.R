@@ -113,7 +113,7 @@ non_lipo <- nr_mnames[!(nr_mnames %in% lipoproteins)]
 
 # Re-order the data by unique identifiers
 d <- arrange(d, aln, qlet)
-length(mnames) - length(nr_mnames) #81
+length(mnames) - length(nr_mnames) #81 ratios removed
 
 # ------------------------------------------------------------------
 # Generate biological subsets

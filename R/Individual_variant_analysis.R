@@ -80,84 +80,66 @@ saveWorkbook(workbook, file = "outputs/tables/FDR_significant_SNP-metab_associat
 load(file = "inputs/Pden_ColCol_variables_for_HeatMap.Rdata")
 
 # Produce heatmaps using differing cluster methods and effect values
-cluster_method <- c("data_driven", "biological")
-data_type <- c("Pr(>|t|)", "Estimate")
-i=1
-j=2
 heat_dat <- c(indi_SNP_results_nr, HMGCR_SNP_results_nr)
-for (i in 1:2) {
-  data <- data_type[i]
-  # Extract the data needed and arrange the metabolites
-  db <- sapply(heat_dat, function(x) {out = x[, data]; return(out)})
-  rownames(db) <- rownames(heat_dat[[1]])
-  db <- as.data.frame(db) %>%
-    mutate(Metabolite = rownames(.)) %>%
-    left_join(subset_df) %>%
-    arrange(subset)
+data <- "Pr(>|t|)"
 
-  rownames(db) <- db[["Metabolite"]]
+# CAN BE DONE USING ESTIMATES
 
-  db <- dplyr::select(db, -one_of(colnames(subset_df)))
+# Extract the data needed and arrange the metabolites
+db <- sapply(heat_dat, function(x) {out = x[, data]; return(out)})
+rownames(db) <- rownames(heat_dat[[1]])
+db <- as.data.frame(db) %>%
+  mutate(Metabolite = rownames(.)) %>%
+  left_join(subset_df) %>%
+  arrange(subset)
 
+rownames(db) <- db[["Metabolite"]]
 
-  # Extract variables required for heatmap function
-  if (data == "Estimate") {
-    b <- seq(from = -5, to = 5, by = 1)
-    hmcol <- colorRampPalette(brewer.pal(9, "RdBu"))
-    key <- TRUE
-  } else if (data == "Pr(>|t|)") {
-    b <- c(0, 1e-8, 1e-6, 1e-4, 1e-2, 0.05, .25, 0.5, 0.75, 1) 
-    hmcol <- brewer.pal(11, "Spectral")[1:5]
-    sig <- brewer.pal(11, "Spectral")[1:5]
-    hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
-    key <- FALSE
-  }
-  for (j in 1:2) {
-    cluster <- cluster_method[j]
-    if (cluster == "data_driven") {
-      ColCol[names(ColCol) %in% 1] <- "white"
-      Colv <- Pden
-      den <- "both"
-      ColSC <- ColCol
-      fin_dat <- db[order(row.names(db)), ]
-    } else if (cluster == "biological") {
-      Colv <- FALSE
-      den <- "none"
-      ColSC <- ColCol2
-      fin_dat <- db
-    }
+db <- dplyr::select(db, -one_of(colnames(subset_df)))
 
-    fin_dat <- as.matrix(fin_dat)
+# Extract variables required for heatmap function
 
-    write.table(fin_dat, file = paste0("outputs/heatmaps/", cluster, "_", data, "dat.txt"), row.names = T, col.names = T, quote = F, sep = "\t")
+b <- c(0, 1e-8, 1e-6, 1e-4, 1e-2, 0.05, .25, 0.5, 0.75, 1) 
+hmcol <- brewer.pal(11, "Spectral")[1:5]
+sig <- brewer.pal(11, "Spectral")[1:5]
+hmcol <- c(sig,"grey90","grey75","grey50", "grey45")
+key <- FALSE
 
-    # Remove HMGCR SNPs from the original heatmap
-    heat1 <- fin_dat[, !(colnames(fin_dat) %in% HMGCR_SNPs)]
+cluster <- "biological"
+Colv <- FALSE
+den <- "none"
+ColSC <- ColCol2
+fin_dat <- db
 
-    pdf(paste0("outputs/heatmaps/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
-    heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = "none", Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
-    print(heatmap)
-    dev.off()
-    ####### The colours aren't correct - need to find a way to change the ordering step!!!!
-    # Make a heatmap with just the SNPs associated with metabolites and the HMGCR SNPs
-    new_fin_dat <- fin_dat[, c(names_hits_FDR, HMGCR_SNPs)]
+fin_dat <- as.matrix(fin_dat)
 
-    gene_info <- SNP_info %>%
-      dplyr::select(Lead_variant, gene) %>%
-      filter(Lead_variant %in% colnames(new_fin_dat))
+write.table(fin_dat, file = paste0("outputs/heatmaps/", cluster, "_", data, "dat.txt"), row.names = T, col.names = T, quote = F, sep = "\t")
 
-    index <- match(colnames(new_fin_dat), gene_info$Lead_variant)
-    gene_info <- gene_info[index, ]
+# Remove HMGCR SNPs from the original heatmap
+heat1 <- fin_dat[, !(colnames(fin_dat) %in% HMGCR_SNPs)]
 
-    gene_info[gene_info$gene == "BUD13_ZNF259_APOA5", "gene"] <- "APOA5"
-    gene_info[gene_info$gene == "TOMM40_APOE_APOC1", "gene"] <- "APOE_APOC1"
+pdf(paste0("outputs/heatmaps/all_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
+heatmap <- heatmap.2( t(heat1), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(fin_dat) , cexRow = 0.5, cexCol = 0.65, dendrogram = "none", Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+print(heatmap)
+dev.off()
 
-    colnames(new_fin_dat) <- paste0(colnames(new_fin_dat), "\n", gene_info$gene)
+# Make a heatmap with just the SNPs associated with metabolites and the HMGCR SNPs
+new_fin_dat <- fin_dat[, c(names_hits_FDR, HMGCR_SNPs)]
+
+gene_info <- SNP_info %>%
+  dplyr::select(Lead_variant, gene) %>%
+  filter(Lead_variant %in% colnames(new_fin_dat))
+
+index <- match(colnames(new_fin_dat), gene_info$Lead_variant)
+gene_info <- gene_info[index, ]
+
+gene_info[gene_info$gene == "BUD13_ZNF259_APOA5", "gene"] <- "APOA5"
+gene_info[gene_info$gene == "TOMM40_APOE_APOC1", "gene"] <- "APOE_APOC1"
+
+colnames(new_fin_dat) <- paste0(colnames(new_fin_dat), "\n", gene_info$gene)
+
+pdf(paste0("outputs/heatmaps/sig_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
+heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1.15, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+dev.off()
 
 
-    pdf(paste0("outputs/heatmaps/sig_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
-    heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1.15, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
-    dev.off()
-
-  }
-}

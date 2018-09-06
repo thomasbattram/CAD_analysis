@@ -53,45 +53,6 @@ for (i in names(result)) {
 		filter(!(Metabolite %in% particle_mets))
 }
 
-stopifnot(result[[1]][["Metabolite"]] == result[[2]][["Metabolite"]] && result[[1]][["Metabolite"]] == result[[3]][["Metabolite"]])
-
-source("R/Forest_plot_functions.R")
-
-facet_var <- facet_var_gen(result[[1]], col_num = 4, group_num = 3)
-
-forest_dat <- do.call(rbind, result) %>%
-	mutate(age = rep(c("7", "15", "17"), each = nrow(result[[1]]))) %>%
-	mutate(facet_var = facet_var)
-
-forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
-forest_dat$age <- factor(forest_dat$age, levels = c(7, 15, 17))
-p <- forest_plot(forest_dat, col_num = 4, group = "age", y_axis = "Metabolite", units = "Log10(median metabolite concentration)", null_at = 0)
-ggsave("outputs/forests/Age_diff_met_conc_no_particle_forest.pdf", plot = p, width = 15, height = 10, units = "in")
-
-# Particle sizes only
-result <- age_diff
-for (i in names(result)) {
-	result[[i]] <- result[[i]] %>%
-		filter(Metabolite %in% particle_mets)
-}
-stopifnot(result[[1]][["Metabolite"]] == result[[2]][["Metabolite"]] && result[[1]][["Metabolite"]] == result[[3]][["Metabolite"]])
-
-#Need to change facet_var_gen()
-facet_var <- facet_var_gen(result[[1]], col_num = 2, group_num = 3)
-
-forest_dat <- do.call(rbind, result) %>%
-	mutate(age = rep(c("7", "15", "17"), each = nrow(result[[1]]))) %>%
-	mutate(facet_var = facet_var)
-
-# Could be changed still? 
-forest_dat[["facet_var"]] <- as.factor(forest_dat[["facet_var"]])
-forest_dat$age <- factor(forest_dat$age, levels = c(7, 15, 17))
-p <- forest_plot(forest_dat, col_num = 2, group = "age", y_axis = "Metabolite", units = "Log10(median metabolite concentration)", null_at = 0)
-ggsave("outputs/forests/Age_diff_met_conc_particle_only_forest.pdf", plot = p, width = 15, height = 10, units = "in")
-
-# ----------------------------------------------------------------------------
-# GRS-metabolite association 
-# ----------------------------------------------------------------------------
 
 full_dat <- do.call(rbind, age_diff)
 full_dat$age <- c(rep(7, length(nr_mnames)), rep(15, length(nr_mnames)), rep(17, length(nr_mnames)))
@@ -100,6 +61,12 @@ kw_age_test <- kruskal.test(Estimate ~ age, data = full_dat)
 kw_age_test #p = 0.8227 therefore no evidence of difference between log10 median values of each metabolite at different age groups
 
 colnames(met_dat)
+
+source("R/Forest_plot_functions.R")
+
+# ----------------------------------------------------------------------------
+# GRS-metabolite association 
+# ----------------------------------------------------------------------------
 
 if (!("CAD_score" %in% colnames(d))) {
 	d[["CAD_score"]] <- rowSums(d[, SNPs])
