@@ -15,6 +15,12 @@ summary(d$CAD_score)
 # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 # 1.212   1.699   1.806   1.812   1.917   2.546
 
+grs_dist_plot <- ggplot(d, aes(x = CAD_score)) +
+  geom_histogram(colour = "black", fill = "blue", alpha = 0.5, binwidth = 0.1) +
+  labs(x = "Coronary artery disease genetic risk score", y = "Individuals")
+
+ggsave("outputs/other/CAD_GRS_distribution.pdf", plot = grs_dist_plot)
+
 new_snps <- gsub("_w", "", SNPs)
 
 summary(rowSums(d[, new_snps]))
