@@ -124,7 +124,7 @@ print(heatmap)
 dev.off()
 
 # Make a heatmap with just the SNPs associated with metabolites and the HMGCR SNPs
-new_fin_dat <- fin_dat[, c(names_hits_FDR, HMGCR_SNPs)]
+new_fin_dat <- fin_dat[, c(names_hits_fdr, HMGCR_SNPs)]
 
 gene_info <- SNP_info %>%
   dplyr::select(Lead_variant, gene) %>%
