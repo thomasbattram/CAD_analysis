@@ -28,6 +28,12 @@ datafile_metabs <- read_dta(met_file) %>%
   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
   dplyr::select(u_ID, everything())
 
+# Set missing values to NA and withdrawn consent to NA
+datafile_metabs[,-c(1:4)] <- apply(datafile_metabs[,-c(1:4)], 2, function(x) {replace(x, which(x == -1 | x == -9999), NA)})
+
+# remove pyruvate because it is indistinguishable from EDTA in NMR analysis
+datafile_metabs <- datafile_metabs[, -grep("pyr", colnames(datafile_metabs), ignore.case = T)]
+
 datafile_SNPs <- read.table(gen_file, header = T) %>%
   mutate(u_ID = paste(aln, qlet, sep = "_")) %>%
   dplyr::select(u_ID, everything())
@@ -98,7 +104,7 @@ d <- left_join(df_main, datafile_SNPs_W) %>%
   .[complete.cases(.), ]
 
 d
-nrow(d) # 5905 people
+nrow(d) # 5907 people
 
 # For cohort characteristics
 # temp <- dplyr::select(d, u_ID, aln, qlet, age)

@@ -12,8 +12,8 @@ write.table(temp, file = "outputs/other/cad_score.txt", col.names = T, row.names
 co_chars <- read.delim(cohort_char_file, stringsAsFactors = F)
 
 summary(d$CAD_score) 
-# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# 1.212   1.699   1.806   1.812   1.917   2.546
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# -1.0490  0.1016  0.3515  0.3588  0.6168  1.7925 
 
 grs_dist_plot <- ggplot(d, aes(x = CAD_score)) +
   geom_histogram(colour = "black", fill = "blue", alpha = 0.5, binwidth = 0.1) +
@@ -25,7 +25,7 @@ new_snps <- gsub("_w", "", SNPs)
 
 summary(rowSums(d[, new_snps]))
 # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# 37.90   49.37   52.19   52.22   55.04   67.46 
+# 99.1   118.5   123.2   123.2   127.8   152.2 
 
 d <- d %>%
   mutate(tp = age) %>%

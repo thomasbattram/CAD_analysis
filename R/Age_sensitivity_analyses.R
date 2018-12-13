@@ -58,7 +58,7 @@ full_dat <- do.call(rbind, age_diff)
 full_dat$age <- c(rep(7, length(nr_mnames)), rep(15, length(nr_mnames)), rep(17, length(nr_mnames)))
 
 kw_age_test <- kruskal.test(Estimate ~ age, data = full_dat) 
-kw_age_test #p = 0.8227 therefore no evidence of difference between log10 median values of each metabolite at different age groups
+kw_age_test #p = 0.8232 therefore no evidence of difference between log10 median values of each metabolite at different age groups
 
 colnames(met_dat)
 
@@ -94,7 +94,7 @@ p <- forest_plot(forest_dat, col_num = 4, group = "age", y_axis = "Metabolite", 
 ggsave("outputs/forests/Age_diff_GRS_met_forest.pdf", plot = p, width = 15, height = 10, units = "in")
 
 full_dat2 <- do.call(rbind, age_diff_reg)
-full_dat2$age <- c(rep(17, 149), rep(15, 149), rep(7, 149))
+full_dat2$age <- c(rep(17, length(nr_mnames)), rep(15, length(nr_mnames)), rep(7, length(nr_mnames)))
 
 kw_age_test2 <- kruskal.test(Estimate ~ age, data = full_dat2) 
 print(kw_age_test2) #p = 0.02417 therefore evidence of difference between age groups 
