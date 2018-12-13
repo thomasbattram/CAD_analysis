@@ -2,7 +2,7 @@
 # Individual variant-metabolite analysis 
 # ------------------------------------------------------------------
 
-indi_SNP_results_nr <- lapply(SNPs, function(x) {linearRegress(x, nr_mnames, d, "age")})
+indi_SNP_results_nr <- lapply(new_snps, function(x) {linearRegress(x, nr_mnames, d, "age")})
 HMGCR_SNP_results_nr <- lapply(HMGCR_SNPs, function(x) {linearRegress(x, nr_mnames, d, "age")})
 names(HMGCR_SNP_results_nr) <- HMGCR_SNPs
 
