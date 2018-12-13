@@ -1,0 +1,21 @@
+# Analysis of coronary artery disease genetic risk and the metabolome in young individuals
+
+## Description
+Files for the analysis of the association between coronary artery disease genetic risk and the metabolome in young individuals using data in ALSPAC
+
+Running masterfile.sh (as below) will complete all of the analyses once everything is setup, please note the prerequisites below
+
+masterfile.sh PATH_TO_DIRECTORY METABOLITE_FILE GENOTYPE_FILE COHORT_CHARACTERISTICS_FILE
+
+## Prerequisites
+* Access the genotype and metabolomics data from ALSPAC
+* The genotype data should be in dosage (bgen) format - if not parts of the R script will have to be altered 
+* Within "outputs", directories named "forests", "tables", "heatmaps" and "other" will need to be made if you are to follow the scripts exactly - of course where the results are outputted and the names of the outputs can be easily changed within the scripts
+
+## Main outputs
+
+* qqplot showing the association between the metabolites and the CAD-GRS
+* violin plot showing how the association between the GRS and lipoproteins differs between lipoprotein subgroups 
+* heatmaps showing 1. association between all SNPs and all metabolites and 2. association between SNPs in _HMGCR_ locus + all SNPs associated with 1 or more metabolites (FDR < 0.05) 
+* age sensitivity analyses plots
+* tables of association
