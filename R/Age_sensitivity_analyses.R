@@ -129,7 +129,7 @@ for (i in unique(res_out$subset)) {
 }
 
 kw_age_test2 <- kruskal.test(Estimate ~ age, data = full_dat2) 
-kw_age_test2 #p = 0.007643 therefore evidence of difference between age groups 
+kw_age_test2 #p = 0.05074 therefore little evidence of difference between age groups 
 dunn_age_test <- dunnTest(Estimate ~ as.factor(age), data = full_dat2, method = "bh")
 
 
