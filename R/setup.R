@@ -31,7 +31,7 @@ datafile_metabs <- read_dta(met_file) %>%
 # Set missing values to NA and withdrawn consent to NA
 datafile_metabs[,-c(1:4)] <- apply(datafile_metabs[,-c(1:4)], 2, function(x) {replace(x, which(x == -1 | x == -9999), NA)})
 
-# remove pyruvate because it is indistinguishable from EDTA in NMR analysis
+# remove pyruvate because it is an unreliable measure when using EDTA treated samples
 datafile_metabs <- datafile_metabs[, -grep("pyr", colnames(datafile_metabs), ignore.case = T)]
 
 datafile_SNPs <- read.table(gen_file, header = T) %>%
