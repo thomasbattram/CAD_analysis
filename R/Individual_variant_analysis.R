@@ -139,7 +139,8 @@ gene_info[gene_info$gene == "TOMM40_APOE_APOC1", "gene"] <- "APOE_APOC1"
 colnames(new_fin_dat) <- paste0(colnames(new_fin_dat), "\n", gene_info$gene)
 
 pdf(paste0("outputs/heatmaps/sig_SNPs_vs_nr_metabs_", cluster, "_", data, "_heatmap.pdf"), width = 15, height = 10)
-heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1.15, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+heatmap2 <- heatmap.2( t(new_fin_dat), breaks = b, key = key, trace = "none", scale = "none", col = hmcol, rowsep = 1:ncol(new_fin_dat) , cexRow = 1.15, cexCol = 0.65, dendrogram = den , Colv =  Colv, Rowv = TRUE, ColSideColors = ColSC, margins =c(5,9))
+print(heatmap2)
 dev.off()
 
 
