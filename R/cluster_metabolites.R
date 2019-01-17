@@ -135,6 +135,8 @@ ColCol3 <- CC2[names(K3)]
 clusters <- data.frame(Metabolite = names(k), cluster = k)
 rownames(clusters) <- NULL
 
+sum(table(clusters$cluster) == 1) ## 22 clusters contain a single metabolite
+
 subset_df <- subset_df %>%
 	left_join(clusters)
 
